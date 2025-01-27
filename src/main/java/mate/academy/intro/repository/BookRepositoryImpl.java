@@ -51,6 +51,8 @@ public class BookRepositoryImpl implements BookRepository {
         try (Session session = sessionFactory.openSession()) {
             Book book = session.get(Book.class, id);
             return Optional.ofNullable(book);
+        } catch (Exception e) {
+            throw new DataProcessingException("Can't find book by id: " + id);
         }
     }
 }
