@@ -12,8 +12,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
 public class BookSpecificationBuilder implements SpecificationBuilder<Book> {
-    private static final String DELIMITER = "-";
-    private static final String NO_VALUE = "no_value";
+    public static final String TITLE = "title";
+    public static final String AUTHOR = "author";
+    public static final String ISBN = "isbn";
+    public static final String PRICE = "price";
+    public static final String NO_VALUE = "no_value";
+    public static final String DELIMITER = "-";
 
     private final SpecificationProviderManager<Book> bookSpecificationProviderManager;
 
@@ -22,17 +26,17 @@ public class BookSpecificationBuilder implements SpecificationBuilder<Book> {
         Specification<Book> spec = Specification.where(null);
         if (searchParameters.title() != null && !searchParameters.title().isEmpty()) {
             spec = spec.and(bookSpecificationProviderManager
-                    .getSpecificationProvider(BookSpecificationConstants.TITLE)
+                    .getSpecificationProvider(TITLE)
                     .getSpecification(searchParameters.title()));
         }
         if (searchParameters.author() != null && !searchParameters.author().isEmpty()) {
             spec = spec.and(bookSpecificationProviderManager
-                    .getSpecificationProvider(BookSpecificationConstants.AUTHOR)
+                    .getSpecificationProvider(AUTHOR)
                     .getSpecification(searchParameters.author()));
         }
         if (searchParameters.isbn() != null && !searchParameters.isbn().isEmpty()) {
             spec = spec.and(bookSpecificationProviderManager
-                    .getSpecificationProvider(BookSpecificationConstants.ISBN)
+                    .getSpecificationProvider(ISBN)
                     .getSpecification(searchParameters.isbn()));
         }
         if (((searchParameters.bottomPrice() != null
@@ -40,7 +44,7 @@ public class BookSpecificationBuilder implements SpecificationBuilder<Book> {
                 || ((searchParameters.upperPrice() != null
                 && searchParameters.upperPrice().compareTo(BigDecimal.ZERO) > 0))) {
             spec = spec.and(bookSpecificationProviderManager
-                    .getSpecificationProvider(BookSpecificationConstants.PRICE)
+                    .getSpecificationProvider(PRICE)
                     .getSpecification(priceToStringConverter(searchParameters.bottomPrice(),
                             searchParameters.upperPrice())));
         }

@@ -1,21 +1,22 @@
 package mate.academy.intro.repository.book.spec;
 
+import static mate.academy.intro.repository.book.BookSpecificationBuilder.DELIMITER;
+import static mate.academy.intro.repository.book.BookSpecificationBuilder.NO_VALUE;
+import static mate.academy.intro.repository.book.BookSpecificationBuilder.PRICE;
+
 import mate.academy.intro.model.Book;
 import mate.academy.intro.repository.SpecificationProvider;
-import mate.academy.intro.repository.book.BookSpecificationConstants;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PriceSpecificationProvider implements SpecificationProvider<Book> {
-    private static final String DELIMITER = "-";
     private static final int BOTTOM_PRICE = 0;
     private static final int UPPER_PRICE = 1;
-    private static final String NO_VALUE = "no_value";
 
     @Override
     public String getKey() {
-        return BookSpecificationConstants.PRICE;
+        return PRICE;
     }
 
     @Override
@@ -26,20 +27,15 @@ public class PriceSpecificationProvider implements SpecificationProvider<Book> {
 
         if (bottomPrice.equals(NO_VALUE)) {
             return (root, query, criteriaBuilder) ->
-                    criteriaBuilder.lessThan(
-                            root.get(BookSpecificationConstants.PRICE), upperPrice
-                    );
+                    criteriaBuilder.lessThan(root.get(PRICE), upperPrice);
         }
 
         if (upperPrice.equals(NO_VALUE)) {
             return (root, query, criteriaBuilder) ->
-                    criteriaBuilder.greaterThan(
-                            root.get(BookSpecificationConstants.PRICE), bottomPrice
-                    );
+                    criteriaBuilder.greaterThan(root.get(PRICE), bottomPrice);
         }
 
         return (root, query, criteriaBuilder) ->
-                criteriaBuilder.between(
-                        root.get(BookSpecificationConstants.PRICE), bottomPrice, upperPrice);
+                criteriaBuilder.between(root.get(PRICE), bottomPrice, upperPrice);
     }
 }
