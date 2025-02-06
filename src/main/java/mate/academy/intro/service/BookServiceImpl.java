@@ -1,5 +1,8 @@
 package mate.academy.intro.service;
 
+import static mate.academy.intro.repository.book.BookSpecificationBuilder.AUTHOR;
+import static mate.academy.intro.repository.book.BookSpecificationBuilder.TITLE;
+
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import mate.academy.intro.dto.BookDto;
@@ -10,7 +13,9 @@ import mate.academy.intro.mapper.BookMapper;
 import mate.academy.intro.model.Book;
 import mate.academy.intro.repository.book.BookRepository;
 import mate.academy.intro.repository.book.BookSpecificationBuilder;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +33,8 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDto> getAll(Pageable pageable) {
-        return bookRepository.findAll(pageable).stream()
+    public List<BookDto> getAll(Integer pageNumber, Integer pageSize, Sort sort) {
+        return bookRepository.findAll(getValidatedPageable(pageNumber, pageSize, sort)).stream()
                 .map(bookMapper::toDto)
                 .toList();
     }
@@ -43,9 +48,11 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDto> search(BookSearchParameters searchParameters, Pageable pageable) {
+    public List<BookDto> search(BookSearchParameters searchParameters,
+                                Integer pageNumber, Integer pageSize, Sort sort) {
         Specification<Book> bookSpecification = bookSpecificationBuilder.build(searchParameters);
-        return bookRepository.findAll(bookSpecification, pageable).stream()
+        return bookRepository.findAll(bookSpecification,
+                        getValidatedPageable(pageNumber, pageSize, sort)).stream()
                 .map(bookMapper::toDto)
                 .toList();
     }
@@ -61,5 +68,12 @@ public class BookServiceImpl implements BookService {
     @Override
     public void deleteById(Long id) {
         bookRepository.deleteById(id);
+    }
+
+    private Pageable getValidatedPageable(Integer pageNumber, Integer pageSize, Sort sort) {
+        pageNumber = (pageNumber != null && pageNumber >= 0) ? pageNumber : 0;
+        pageSize = (pageSize != null && pageSize >= 0) ? pageSize : 10;
+        sort = (sort != null) ? sort : Sort.by(Sort.Order.asc(TITLE), Sort.Order.asc(AUTHOR));
+        return PageRequest.of(pageNumber, pageSize, sort);
     }
 }
