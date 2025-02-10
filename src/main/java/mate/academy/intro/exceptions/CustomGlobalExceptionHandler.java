@@ -38,6 +38,12 @@ public class CustomGlobalExceptionHandler {
         return buildErrorResponse(exception, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(RegistrationException.class)
+    public ResponseEntity<Map<String, Object>> handleRegistrationExceptions(
+            RegistrationException exception) {
+        return buildErrorResponse(exception, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleAllExceptions(
             Exception exception) {
