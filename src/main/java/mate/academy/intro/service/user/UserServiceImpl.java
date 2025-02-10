@@ -7,7 +7,6 @@ import mate.academy.intro.exceptions.RegistrationException;
 import mate.academy.intro.mapper.UserMapper;
 import mate.academy.intro.model.User;
 import mate.academy.intro.repository.user.UserRepository;
-import mate.academy.intro.util.HashUtil;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -18,13 +17,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto register(UserRegistrationRequestDto requestDto) {
-        if (userRepository.findByEmail(requestDto.getEmail()).isPresent()) {
+        if (userRepository.existsByEmail(requestDto.getEmail())) {
             throw new RegistrationException("User with email:" + requestDto.getEmail()
                     + " is already exist");
         }
         User user = userMapper.toModel(requestDto);
-        user.setSalt(HashUtil.getSalt());
-        user.setPassword(HashUtil.hashPassword(requestDto.getPassword(), user.getSalt()));
         return userMapper.toDto(userRepository.save(user));
     }
 }

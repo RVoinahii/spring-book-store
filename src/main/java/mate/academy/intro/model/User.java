@@ -36,9 +36,6 @@ public class User {
 
     private String shippingAddress;
 
-    @Column(nullable = false)
-    private String salt;
-
     @Column(nullable = false, columnDefinition = "TINYINT")
     private boolean isDeleted = false;
 }

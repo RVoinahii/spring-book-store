@@ -41,7 +41,7 @@ public class CustomGlobalExceptionHandler {
     @ExceptionHandler(RegistrationException.class)
     public ResponseEntity<Map<String, Object>> handleRegistrationExceptions(
             RegistrationException exception) {
-        return buildErrorResponse(exception, HttpStatus.BAD_REQUEST);
+        return buildErrorResponse(exception, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(Exception.class)
