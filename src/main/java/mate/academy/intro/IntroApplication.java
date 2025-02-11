@@ -1,7 +1,7 @@
 package mate.academy.intro;
 
 import lombok.RequiredArgsConstructor;
-import mate.academy.intro.service.BookService;
+import mate.academy.intro.service.book.BookService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
