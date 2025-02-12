@@ -2,7 +2,7 @@ package mate.academy.intro.config;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
-import mate.academy.intro.security.CustomUserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -16,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @EnableMethodSecurity
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
     public static final String[] PUBLIC_URLS = {
             "/auth/**",
@@ -29,10 +30,6 @@ public class SecurityConfig {
     };
 
     private final UserDetailsService userDetailsService;
-
-    public SecurityConfig(CustomUserDetailsService userDetailsServiceService) {
-        this.userDetailsService = userDetailsServiceService;
-    }
 
     @Bean
     public PasswordEncoder getPasswordEncoder() {
@@ -58,3 +55,4 @@ public class SecurityConfig {
                 .build();
     }
 }
+
