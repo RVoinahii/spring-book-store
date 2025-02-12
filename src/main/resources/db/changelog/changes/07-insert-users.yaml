@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-users
+      author: romanvoinahii
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: email
+                  value: "john.doe@example.com"
+              - column:
+                  name: password
+                  value: "$2a$10$40VcEX9yypgQXTJ0CL/oteEJuB03CJ0lGzxmhB1ZlsDDLL5LnHbga"
+              - column:
+                  name: first_name
+                  value: "John"
+              - column:
+                  name: last_name
+                  value: "Doe"
+              - column:
+                  name: shipping_address
+                  value: "123 Main St"
+              - column:
+                 name: is_deleted
+                 value: 0
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: email
+                  value: "alice.doe@example.com"
+              - column:
+                  name: password
+                  value: "$2a$10$40VcEX9yypgQXTJ0CL/oteEJuB03CJ0lGzxmhB1ZlsDDLL5LnHbga"
+              - column:
+                  name: first_name
+                  value: "Alice"
+              - column:
+                  name: last_name
+                  value: "Doe"
+              - column:
+                  name: shipping_address
+                  value: "123 Main St"
+              - column:
+                  name: is_deleted
+                  value: 0

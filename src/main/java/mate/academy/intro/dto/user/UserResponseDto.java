@@ -1,5 +1,6 @@
 package mate.academy.intro.dto.user;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,4 +12,5 @@ public class UserResponseDto {
     private String firstName;
     private String lastName;
     private String shippingAddress;
+    private List<String> roles;
 }
