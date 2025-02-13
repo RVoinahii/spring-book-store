@@ -16,13 +16,10 @@ import org.springframework.stereotype.Component;
 public class JwtUtil {
     private final SecretKey secret;
 
-    //Added default values in @Value annotations because the CE version of IntelliJ can't read
-    //properties from file via @Value, ine the rest, build of the project doesn't go through.
-    @Value("${jwt.expiration:300000}")
+    @Value("${jwt.expiration}")
     private Long expiration;
 
-    //Same reason for default value here.
-    public JwtUtil(@Value("${jwt.secret:absolutesecret12345678910hellooo}") String secretString) {
+    public JwtUtil(@Value("${jwt.secret}") String secretString) {
         secret = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
     }
 

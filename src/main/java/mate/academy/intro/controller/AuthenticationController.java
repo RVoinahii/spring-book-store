@@ -38,7 +38,7 @@ public class AuthenticationController {
             summary = "Authenticate existing user",
             description = "Authenticate existing user with the provided parameters"
     )
-    public UserLoginResponseDto login(@RequestBody UserLoginRequestDto requestDto) {
+    public UserLoginResponseDto login(@RequestBody @Valid UserLoginRequestDto requestDto) {
         return authenticationService.authenticate(requestDto);
     }
 }
