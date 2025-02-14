@@ -31,11 +31,11 @@ public class UserServiceImpl implements UserService {
             throw new RegistrationException("User with email:" + requestDto.getEmail()
                     + " is already exist");
         }
-        User user = userMapper.toModel(requestDto);
+        User user = userMapper.toEntity(requestDto);
         user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
-        Role role = roleRepository.findByRole(RoleName.USER)
+        Role role = roleRepository.findByRole(RoleName.ADMIN)
                     .orElseThrow(() -> new EntityNotFoundException(
-                            "Role with name '" + RoleName.USER + "' not found")
+                            "Role with name '" + RoleName.ADMIN + "' not found")
                     );
         user.setRoles(Set.of(role));
         return userMapper.toDto(userRepository.save(user));

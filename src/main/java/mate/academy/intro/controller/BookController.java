@@ -29,8 +29,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Library management", description = "Endpoints for managing books")
-@SecurityRequirement(name = "BasicAuth")
+@Tag(name = "Book management", description = "Endpoints for managing books")
+@SecurityRequirement(name = "BearerAuthentication")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/books")
@@ -72,7 +72,7 @@ public class BookController {
         return bookService.search(searchParameters, pageable);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('USER')")
     @PostMapping
     @Operation(
             summary = "Create a new book",
