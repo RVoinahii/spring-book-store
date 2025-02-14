@@ -72,7 +72,7 @@ public class BookController {
         return bookService.search(searchParameters, pageable);
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     @Operation(
             summary = "Create a new book",
