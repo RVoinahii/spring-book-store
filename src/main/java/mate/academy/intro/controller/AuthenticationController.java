@@ -4,8 +4,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import mate.academy.intro.dto.user.UserLoginRequestDto;
+import mate.academy.intro.dto.user.UserLoginResponseDto;
 import mate.academy.intro.dto.user.UserRegistrationRequestDto;
 import mate.academy.intro.dto.user.UserResponseDto;
+import mate.academy.intro.security.AuthenticationService;
 import mate.academy.intro.service.user.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 public class AuthenticationController {
     private final UserService userService;
+    private final AuthenticationService authenticationService;
 
     @PostMapping("/registration")
     @Operation(
@@ -27,5 +31,14 @@ public class AuthenticationController {
     public UserResponseDto registerUser(
             @RequestBody @Valid UserRegistrationRequestDto userRequestDto) {
         return userService.register(userRequestDto);
+    }
+
+    @PostMapping("/login")
+    @Operation(
+            summary = "Authenticate existing user",
+            description = "Authenticate existing user with the provided parameters"
+    )
+    public UserLoginResponseDto login(@RequestBody @Valid UserLoginRequestDto requestDto) {
+        return authenticationService.authenticate(requestDto);
     }
 }

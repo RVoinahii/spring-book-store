@@ -1,7 +1,6 @@
 package mate.academy.intro;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -25,10 +24,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         )
 )
 @SecurityScheme(
-        name = "BasicAuth",
-        scheme = "basic",
+        name = "BearerAuthentication",
+        scheme = "bearer",
         type = SecuritySchemeType.HTTP,
-        in = SecuritySchemeIn.HEADER
+        bearerFormat = "JWT"
 )
 public class IntroApplication {
     private final BookService bookService;

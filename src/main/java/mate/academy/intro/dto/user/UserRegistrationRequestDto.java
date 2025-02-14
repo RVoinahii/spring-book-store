@@ -20,11 +20,11 @@ public class UserRegistrationRequestDto {
     private String email;
 
     @NotBlank
-    @Length(min = 8, max = 35)
+    @Length(min = 8, max = 20)
     private String password;
 
     @NotBlank
-    @Length(min = 8, max = 35)
+    @Length(min = 8, max = 20)
     private String repeatPassword;
 
     @NotBlank
