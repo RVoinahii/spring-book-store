@@ -7,13 +7,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import mate.academy.intro.dto.book.BookWithoutCategoriesDto;
 import mate.academy.intro.dto.category.CategoryDto;
 import mate.academy.intro.dto.category.CreateCategoryRequestDto;
 import mate.academy.intro.service.category.CategoryService;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -44,10 +44,10 @@ public class CategoryController {
     @GetMapping
     @Operation(
             summary = "Get all categories",
-            description = "Get a paginated list of all available categories in the library"
+            description = "Get a paginated list of all available categories in the library "
                     + "(Required roles: USER, ADMIN)"
     )
-    public List<CategoryDto> getAllCategories(@ParameterObject @PageableDefault(
+    public Page<CategoryDto> getAllCategories(@ParameterObject @PageableDefault(
             sort = {NAME, DESCRIPTION}, direction = Sort.Direction.ASC
     ) Pageable pageable) {
         return categoryService.findAll(pageable);
@@ -65,7 +65,12 @@ public class CategoryController {
 
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     @GetMapping("/{id}/books")
-    public List<BookWithoutCategoriesDto> getBooksByCategoryId(@ParameterObject @PageableDefault(
+    @Operation(
+            summary = "Get all books by category ID",
+            description = "Get a paginated list of all available books in the library "
+                    + "by category ID (Required roles: USER, ADMIN)"
+    )
+    public Page<BookWithoutCategoriesDto> getBooksByCategoryId(@ParameterObject @PageableDefault(
             sort = {TITLE, AUTHOR}, direction = Sort.Direction.ASC
     ) Pageable pageable, @PathVariable Long id) {
         return categoryService.getBooksByCategoryId(pageable, id);
@@ -90,7 +95,7 @@ public class CategoryController {
                     + "(Required roles: ADMIN)"
     )
     public CategoryDto updateCategory(@PathVariable Long id,
-                                      @RequestBody CreateCategoryRequestDto categoryDto) {
+                                      @RequestBody @Valid CreateCategoryRequestDto categoryDto) {
         return categoryService.update(id, categoryDto);
     }
 

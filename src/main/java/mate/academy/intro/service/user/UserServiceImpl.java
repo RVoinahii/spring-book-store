@@ -33,9 +33,9 @@ public class UserServiceImpl implements UserService {
         }
         User user = userMapper.toEntity(requestDto);
         user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
-        Role role = roleRepository.findByRole(RoleName.ADMIN)
+        Role role = roleRepository.findByRole(RoleName.USER)
                     .orElseThrow(() -> new EntityNotFoundException(
-                            "Role with name '" + RoleName.ADMIN + "' not found")
+                            "Role with name '" + RoleName.USER + "' not found")
                     );
         user.setRoles(Set.of(role));
         return userMapper.toDto(userRepository.save(user));

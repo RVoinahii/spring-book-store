@@ -7,7 +7,7 @@ public record CreateCategoryRequestDto(
         @NotBlank
         String name,
 
-        @Size(max = 255)
+        @Size(max = 1000)
         String description
 ) {
 }

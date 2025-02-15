@@ -7,13 +7,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import mate.academy.intro.dto.book.BookDto;
 import mate.academy.intro.dto.book.BookSearchParameters;
 import mate.academy.intro.dto.book.CreateBookRequestDto;
 import mate.academy.intro.service.book.BookService;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -44,7 +44,7 @@ public class BookController {
             description = "Get a paginated list of all available books in the library "
                     + "(Required roles: USER, ADMIN)"
     )
-    public List<BookDto> getAllBooks(@ParameterObject @PageableDefault(sort = {TITLE, AUTHOR},
+    public Page<BookDto> getAllBooks(@ParameterObject @PageableDefault(sort = {TITLE, AUTHOR},
             direction = Sort.Direction.ASC) Pageable pageable) {
         return bookService.getAll(pageable);
     }
@@ -66,7 +66,7 @@ public class BookController {
             description = "Search for books by the given parameters (title, author, etc.) "
                     + "(Required roles: USER, ADMIN)"
     )
-    public List<BookDto> search(BookSearchParameters searchParameters,
+    public Page<BookDto> search(BookSearchParameters searchParameters,
                                 @ParameterObject @PageableDefault(sort = {TITLE, AUTHOR},
                                         direction = Sort.Direction.ASC) Pageable pageable) {
         return bookService.search(searchParameters, pageable);

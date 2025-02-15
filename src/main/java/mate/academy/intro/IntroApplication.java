@@ -14,7 +14,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @OpenAPIDefinition(
         info = @Info(
-                title = "SpringBook store",
+                title = "SpringBook Store",
                 version = "0.7.5",
                 description = "This project in only for learning!",
                 contact = @Contact(
