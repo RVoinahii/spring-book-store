@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
             throw new RegistrationException("User with email:" + requestDto.getEmail()
                     + " is already exist");
         }
-        User user = userMapper.toModel(requestDto);
+        User user = userMapper.toEntity(requestDto);
         user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
         Role role = roleRepository.findByRole(RoleName.USER)
                     .orElseThrow(() -> new EntityNotFoundException(
