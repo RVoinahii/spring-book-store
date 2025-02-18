@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
             throw new RegistrationException("User with email:" + requestDto.getEmail()
                     + " is already exist");
         }
-        User user = userRepository.save(createUser(requestDto));
+        User user = createUser(requestDto);
         shoppingCartService.createShoppingCartForUser(user);
         return userMapper.toDto(user);
     }
@@ -46,6 +46,6 @@ public class UserServiceImpl implements UserService {
                         "Role with name '" + RoleName.USER + "' not found")
                 );
         user.setRoles(Set.of(role));
-        return user;
+        return userRepository.save(user);
     }
 }

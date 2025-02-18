@@ -37,7 +37,7 @@ databaseChangeLog:
             onDelete: CASCADE
         - addForeignKeyConstraint:
             baseTableName: cart_items
-            baseColumnNames: shopping_cart_id
+            baseColumnNames: book_id
             constraintName: fk_cart_items_book
             referencedTableName: books
             referencedColumnNames: id

@@ -9,7 +9,6 @@ import mate.academy.intro.dto.shopping.cart.AddItemToCartRequestDto;
 import mate.academy.intro.dto.shopping.cart.ShoppingCartDto;
 import mate.academy.intro.dto.shopping.cart.UpdateItemInCartRequestDto;
 import mate.academy.intro.model.User;
-import mate.academy.intro.service.cart.item.CartItemService;
 import mate.academy.intro.service.shopping.cart.ShoppingCartService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/cart")
 public class ShoppingCartController {
     private final ShoppingCartService shoppingCartService;
-    private final CartItemService cartItemService;
 
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     @GetMapping
@@ -83,7 +81,7 @@ public class ShoppingCartController {
                     + "the given ID (Required roles: USER)"
     )
     public void deleteBook(@PathVariable Long id) {
-        cartItemService.deleteById(id);
+        shoppingCartService.deleteItemById(id);
     }
 
     private User getAuthenticatedUser(Authentication authentication) {

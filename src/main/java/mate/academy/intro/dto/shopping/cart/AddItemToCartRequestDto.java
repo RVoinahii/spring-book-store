@@ -1,9 +1,11 @@
 package mate.academy.intro.dto.shopping.cart;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public record AddItemToCartRequestDto(
         @Positive
+        @NotNull
         Long bookId,
 
         @Positive
