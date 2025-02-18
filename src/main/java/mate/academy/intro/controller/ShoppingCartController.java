@@ -39,8 +39,7 @@ public class ShoppingCartController {
                     + "(Required roles: USER, ADMIN)"
     )
     public ShoppingCartDto getCartInfo(Authentication authentication) {
-        User user = getAuthenticatedUser(authentication);
-        return shoppingCartService.getCartInfo(user.getId());
+        return shoppingCartService.getCartInfo(getAuthenticatedUserId(authentication));
     }
 
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
@@ -53,8 +52,8 @@ public class ShoppingCartController {
     public ShoppingCartDto addItemToCart(
             @RequestBody @Valid AddItemToCartRequestDto requestDto,
             Authentication authentication) {
-        User user = getAuthenticatedUser(authentication);
-        return shoppingCartService.addItemToCart(requestDto, user.getId());
+        return shoppingCartService.addItemToCart(
+                requestDto, getAuthenticatedUserId(authentication));
     }
 
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
@@ -68,8 +67,8 @@ public class ShoppingCartController {
             @RequestBody @Valid UpdateItemInCartRequestDto requestDto,
             @PathVariable Long id,
             Authentication authentication) {
-        User user = getAuthenticatedUser(authentication);
-        return shoppingCartService.updateItemInCart(requestDto, id, user.getId());
+        return shoppingCartService.updateItemInCart(
+                requestDto, id, getAuthenticatedUserId(authentication));
     }
 
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
@@ -84,7 +83,8 @@ public class ShoppingCartController {
         shoppingCartService.deleteItemById(id);
     }
 
-    private User getAuthenticatedUser(Authentication authentication) {
-        return (User) authentication.getPrincipal();
+    private Long getAuthenticatedUserId(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return user.getId();
     }
 }
