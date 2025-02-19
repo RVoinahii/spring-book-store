@@ -15,6 +15,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class BookServiceImpl implements BookService {
@@ -23,7 +24,6 @@ public class BookServiceImpl implements BookService {
     private final BookSpecificationBuilder bookSpecificationBuilder;
 
     @Override
-    @Transactional
     public BookDto create(CreateBookRequestDto bookDto) {
         Book book = bookMapper.toEntity(bookDto);
         return bookMapper.toDto(bookRepository.save(book));

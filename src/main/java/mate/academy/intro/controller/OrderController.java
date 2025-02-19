@@ -37,7 +37,7 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping
     @Operation(
             summary = "Get full order list",
@@ -50,7 +50,7 @@ public class OrderController {
         return orderService.getAllOrders(pageable, user.getId());
     }
 
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/{orderId}/items")
     @Operation(
             summary = "Get all items in order ID",
@@ -61,18 +61,18 @@ public class OrderController {
         return orderService.getOrderItems(orderId);
     }
 
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/{orderId}/items/{itemId}")
     @Operation(
             summary = "Get info about item in order by item ID and order ID",
             description = "Retrieve details of a specific item in the specified order "
                     + "(Required roles: USER, ADMIN)"
     )
-    public OrderItemDto viewOrderItems(@PathVariable Long orderId, @PathVariable Long itemId) {
+    public OrderItemDto viewOrderItem(@PathVariable Long orderId, @PathVariable Long itemId) {
         return orderService.getOrderItemInfo(orderId, itemId);
     }
 
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping
     @Operation(
             summary = "Place new order",

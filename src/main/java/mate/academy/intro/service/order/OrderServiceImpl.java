@@ -27,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -36,7 +37,6 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
 
     @Override
-    @Transactional
     public OrderDto placeOrder(CreateOrderRequestDto requestDto, User user) {
         ShoppingCart shoppingCart = shoppingCartService.findShoppingCartByUserId(user.getId());
         if (shoppingCart.getCartItems() == null || shoppingCart.getCartItems().isEmpty()) {
@@ -61,7 +61,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderItemDto> getOrderItems(Long orderId) {
-        Order order = getOrderById(orderId);
+        Order order = getOrderByIdWithOrderItems(orderId);
         return order.getOrderItems().stream()
                 .map(orderItemMapper::toDto)
                 .toList();
@@ -69,7 +69,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderItemDto getOrderItemInfo(Long orderId, Long itemId) {
-        Order order = getOrderById(orderId);
+        Order order = getOrderByIdWithOrderItems(orderId);
         OrderItem existingOrderItem = order.getOrderItems().stream()
                 .filter(item -> item.getId().equals(itemId))
                 .findFirst()
@@ -81,9 +81,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Transactional
     public OrderDto updateOrderStatus(UpdateOrderStatusRequestDto requestDto, Long orderId) {
-        Order order = getOrderById(orderId);
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new EntityNotFoundException("Can't find order with id: " + orderId));
         order.setStatus(Status.valueOf(requestDto.status()));
         return orderMapper.toDto(orderRepository.save(order));
     }
@@ -99,8 +99,8 @@ public class OrderServiceImpl implements OrderService {
         return order;
     }
 
-    private Order getOrderById(Long orderId) {
-        return orderRepository.findById(orderId).orElseThrow(
+    private Order getOrderByIdWithOrderItems(Long orderId) {
+        return orderRepository.findByIdWithOrderItems(orderId).orElseThrow(
                 () -> new EntityNotFoundException("Can't find order with id: " + orderId));
     }
 }

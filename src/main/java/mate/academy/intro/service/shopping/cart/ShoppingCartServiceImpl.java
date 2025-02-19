@@ -16,6 +16,7 @@ import mate.academy.intro.repository.shopping.cart.item.CartItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class ShoppingCartServiceImpl implements ShoppingCartService {
@@ -31,7 +32,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    @Transactional
     public ShoppingCartDto addItemToCart(AddItemToCartRequestDto requestDto, Long userId) {
         ShoppingCart shoppingCart = findShoppingCartByUserId(userId);
         Book book = bookRepository.findById(requestDto.bookId()).orElseThrow(
@@ -51,7 +51,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    @Transactional
     public ShoppingCartDto updateItemInCart(
             UpdateItemInCartRequestDto requestDto, Long id, Long userId) {
         ShoppingCart shoppingCart = findShoppingCartByUserId(userId);
@@ -66,7 +65,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    @Transactional
     public void createShoppingCartForUser(User user) {
         ShoppingCart shoppingCart = new ShoppingCart();
         shoppingCart.setUser(user);

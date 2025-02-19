@@ -22,6 +22,5 @@ public interface OrderMapper {
                 .map(orderItemMapper::toDto)
                 .toList();
         orderDto.setOrderItems(orderItemDtoList);
-
     }
 }

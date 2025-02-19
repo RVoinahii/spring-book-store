@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -44,14 +45,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Transactional
     public CategoryDto save(CreateCategoryRequestDto categoryDto) {
         Category category = categoryMapper.toEntity(categoryDto);
         return categoryMapper.toDto(categoryRepository.save(category));
     }
 
     @Override
-    @Transactional
     public CategoryDto update(Long id, CreateCategoryRequestDto updatedCategoryDataDto) {
         Category existingCategory = categoryRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Can't find category by id: " + id));
@@ -60,7 +59,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Transactional
     public void deleteById(Long id) {
         categoryRepository.deleteById(id);
     }
