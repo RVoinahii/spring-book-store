@@ -3,7 +3,7 @@ package mate.academy.intro.dto.shopping.cart;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-import mate.academy.intro.dto.cart.item.CartItemDto;
+import mate.academy.intro.dto.shopping.cart.item.CartItemDto;
 
 @Getter
 @Setter

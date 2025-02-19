@@ -1,4 +1,4 @@
-package mate.academy.intro.repository.cart.item;
+package mate.academy.intro.repository.shopping.cart.item;
 
 import mate.academy.intro.model.CartItem;
 import org.springframework.data.jpa.repository.JpaRepository;

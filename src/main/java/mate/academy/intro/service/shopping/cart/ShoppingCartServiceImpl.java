@@ -11,8 +11,8 @@ import mate.academy.intro.model.CartItem;
 import mate.academy.intro.model.ShoppingCart;
 import mate.academy.intro.model.User;
 import mate.academy.intro.repository.book.BookRepository;
-import mate.academy.intro.repository.cart.item.CartItemRepository;
 import mate.academy.intro.repository.shopping.cart.ShoppingCartRepository;
+import mate.academy.intro.repository.shopping.cart.item.CartItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,7 +77,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         cartItemRepository.deleteById(id);
     }
 
-    private ShoppingCart findShoppingCartByUserId(Long userId) {
+    @Override
+    public ShoppingCart findShoppingCartByUserId(Long userId) {
         return shoppingCartRepository.findById(userId).orElseThrow(
                 () -> new EntityNotFoundException("Can't find shopping cart "
                         + "for user"));
