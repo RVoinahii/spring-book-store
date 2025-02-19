@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -22,6 +23,7 @@ public class BookServiceImpl implements BookService {
     private final BookSpecificationBuilder bookSpecificationBuilder;
 
     @Override
+    @Transactional
     public BookDto create(CreateBookRequestDto bookDto) {
         Book book = bookMapper.toEntity(bookDto);
         return bookMapper.toDto(bookRepository.save(book));
@@ -49,6 +51,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional
     public BookDto updateById(Long id, CreateBookRequestDto updatedBookDataDto) {
         Book existingBook = bookRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Can't find book by id: " + id));
@@ -57,6 +60,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
         bookRepository.deleteById(id);
     }
