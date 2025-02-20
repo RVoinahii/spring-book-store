@@ -40,7 +40,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping
     @Operation(
             summary = "Get all categories",
@@ -53,7 +53,7 @@ public class CategoryController {
         return categoryService.findAll(pageable);
     }
 
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/{id}")
     @Operation(
             summary = "Get a category by ID",
@@ -63,7 +63,7 @@ public class CategoryController {
         return categoryService.getById(id);
     }
 
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/{id}/books")
     @Operation(
             summary = "Get all books by category ID",

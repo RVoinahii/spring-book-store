@@ -1,13 +1,12 @@
-package mate.academy.intro.dto.cart.item;
+package mate.academy.intro.dto.order.item;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class CartItemDto {
+public class OrderItemDto {
     private Long id;
     private Long bookId;
-    private String bookTitle;
     private int quantity;
 }

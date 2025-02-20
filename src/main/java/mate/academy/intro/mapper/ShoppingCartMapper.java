@@ -2,8 +2,8 @@ package mate.academy.intro.mapper;
 
 import java.util.List;
 import mate.academy.intro.config.MapperConfig;
-import mate.academy.intro.dto.cart.item.CartItemDto;
 import mate.academy.intro.dto.shopping.cart.ShoppingCartDto;
+import mate.academy.intro.dto.shopping.cart.item.CartItemDto;
 import mate.academy.intro.model.ShoppingCart;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
