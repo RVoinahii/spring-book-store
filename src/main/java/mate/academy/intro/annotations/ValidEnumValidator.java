@@ -5,11 +5,11 @@ import jakarta.validation.ConstraintValidatorContext;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class OrderStatusValidator implements ConstraintValidator<OrderStatus, String> {
+public class ValidEnumValidator implements ConstraintValidator<ValidEnum, String> {
     private Enum<?>[] enumValues;
 
     @Override
-    public void initialize(OrderStatus annotation) {
+    public void initialize(ValidEnum annotation) {
         enumValues = annotation.enumClass().getEnumConstants();
     }
 
@@ -28,7 +28,7 @@ public class OrderStatusValidator implements ConstraintValidator<OrderStatus, St
                     .collect(Collectors.joining(", "));
 
             context.buildConstraintViolationWithTemplate(
-                    "Invalid order status. Must contain one of: " + validEnumValues)
+                    "Invalid value. Must contain one of: " + validEnumValues)
                     .addConstraintViolation();
         }
         return valid;

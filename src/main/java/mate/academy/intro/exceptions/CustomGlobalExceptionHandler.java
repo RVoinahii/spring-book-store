@@ -32,6 +32,12 @@ public class CustomGlobalExceptionHandler {
         return buildErrorResponse(exception, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(OrderProcessingException.class)
+    public ResponseEntity<Map<String, Object>> handleOrderProcessingExceptions(
+            OrderProcessingException exception) {
+        return buildErrorResponse(exception, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(SpecificationNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleSpecificationNotFoundExceptions(
             SpecificationNotFoundException exception) {

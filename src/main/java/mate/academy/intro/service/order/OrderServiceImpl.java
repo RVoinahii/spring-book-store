@@ -1,7 +1,6 @@
 package mate.academy.intro.service.order;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -12,6 +11,7 @@ import mate.academy.intro.dto.order.OrderDto;
 import mate.academy.intro.dto.order.UpdateOrderStatusRequestDto;
 import mate.academy.intro.dto.order.item.OrderItemDto;
 import mate.academy.intro.exceptions.EntityNotFoundException;
+import mate.academy.intro.exceptions.OrderProcessingException;
 import mate.academy.intro.mapper.OrderItemMapper;
 import mate.academy.intro.mapper.OrderMapper;
 import mate.academy.intro.model.CartItem;
@@ -40,7 +40,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderDto placeOrder(CreateOrderRequestDto requestDto, User user) {
         ShoppingCart shoppingCart = shoppingCartService.findShoppingCartByUserId(user.getId());
         if (shoppingCart.getCartItems() == null || shoppingCart.getCartItems().isEmpty()) {
-            throw new IllegalStateException("Shopping cart is empty");
+            throw new OrderProcessingException("Shopping cart is empty");
         }
         Set<CartItem> cartItems = new LinkedHashSet<>(shoppingCart.getCartItems());
         Order order = createOrderWithoutItems(requestDto, user);
@@ -91,7 +91,6 @@ public class OrderServiceImpl implements OrderService {
     private Order createOrderWithoutItems(CreateOrderRequestDto requestDto, User user) {
         Order order = new Order();
         order.setUser(user);
-        order.setOrderDate(LocalDateTime.now());
         order.setStatus(Status.PENDING);
         order.setTotal(BigDecimal.ZERO);
         order.setShippingAddress(requestDto.shippingAddress());

@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = OrderStatusValidator.class)
-public @interface OrderStatus {
+@Constraint(validatedBy = ValidEnumValidator.class)
+public @interface ValidEnum {
     Class<? extends Enum<?>> enumClass();
     String message() default "Invalid value";
     Class<?>[] groups() default {};

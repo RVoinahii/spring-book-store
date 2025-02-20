@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
-    public static final String ORDER_DATE = "orderDate";
+    private static final String ORDER_DATE = "orderDate";
 
     private final OrderService orderService;
 
