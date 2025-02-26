@@ -1,8 +1,7 @@
-package mate.academy.intro.service;
+package mate.academy.intro.service.book;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
@@ -23,7 +22,6 @@ import mate.academy.intro.model.Book;
 import mate.academy.intro.model.Category;
 import mate.academy.intro.repository.book.BookRepository;
 import mate.academy.intro.repository.book.BookSpecificationBuilder;
-import mate.academy.intro.service.book.BookServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,7 +56,8 @@ public class BookServiceTests {
 
     @Test
     @DisplayName("""
-            (Create) Should return the correct BookDto when a book is successfully created
+            create():
+             Should return the correct BookDto when a book is successfully created
             """)
     void create_ValidCreateBookRequestDto_ReturnsBookDto() {
         //Given
@@ -81,7 +80,8 @@ public class BookServiceTests {
 
     @Test
     @DisplayName("""
-            (Get all) Verify the correct Page<BookDto> was returned when pageable is valid
+            getAll():
+             Should return correct Page<BookDto> when pageable is valid
             """)
     void getAll_ValidPageable_ReturnsAllBooks() {
         //Given
@@ -100,7 +100,7 @@ public class BookServiceTests {
 
         //Then
         assertThat(bookDtos).hasSize(1);
-        assertThat(bookDtos.getContent().get(0)).isEqualTo(bookDto);
+        assertThat(bookDtos.getContent().getFirst()).isEqualTo(bookDto);
         verify(bookRepository, times(1)).findAll(pageable);
         verify(bookMapper, times(1)).toDto(book);
         verifyNoMoreInteractions(bookRepository, bookMapper);
@@ -108,7 +108,8 @@ public class BookServiceTests {
 
     @Test
     @DisplayName("""
-            (Get by ID) Verify the correct BookDto was returned when book exists
+            getById():
+             Should return correct BookDto when book exists
             """)
     void getById_WithValidBookId_ShouldReturnValidBookDto() {
         //Given
@@ -129,7 +130,8 @@ public class BookServiceTests {
 
     @Test
     @DisplayName("""
-            (Get by ID) Should throw EntityNotFoundException when the book doesn't exist
+            geById():
+             Should throw EntityNotFoundException when book doesn't exist
             """)
     void getById_WithInvalidBookId_ShouldThrowException() {
         //Given
@@ -151,8 +153,8 @@ public class BookServiceTests {
 
     @Test
     @DisplayName("""
-            (Search) Verify the correct Page<BookDto> was returned when
-             pageable and search parameters is valid
+            search():
+             Should return Page of BookDto when search parameters are valid
             """)
     void search_WithValidParameters_ShouldReturnPageOfBookDtos() {
         //Given
@@ -186,7 +188,8 @@ public class BookServiceTests {
 
     @Test
     @DisplayName("""
-            (Update by ID) Should return the correct BookDto when a book is successfully updated
+            updateById():
+             Should return correct BookDto when book is successfully updated
             """)
     void updateById_WithValidId_ShouldReturnValidDto() {
         //Given
@@ -217,7 +220,8 @@ public class BookServiceTests {
 
     @Test
     @DisplayName("""
-            (Update by ID) Should throw EntityNotFoundException when the book doesn't exist
+            updateById():
+             Should throw EntityNotFoundException when the book doesn't exist during update
             """)
     void updateById_WithInvalidBookId_ShouldThrowException() {
         //Given
@@ -243,7 +247,8 @@ public class BookServiceTests {
 
     @Test
     @DisplayName("""
-            (Delete by ID) Should delete book by id when valid id is provided
+            deleteById():
+             Should delete book by ID when a valid ID is provided
             """)
     void deleteById_WithValidId_ShouldInvokeRepositoryOnce() {
         //Given
