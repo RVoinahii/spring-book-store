@@ -85,14 +85,14 @@ public class BookControllerTests {
                 .andExpect(status().isOk())
                 .andReturn();
         //Then
-        PageResponse<BookDto> actualPage = objectMapper.readValue(result.getResponse()
+        PageResponse<BookDto> actualBookDtosPage = objectMapper.readValue(result.getResponse()
                 .getContentAsString(), new TypeReference<>() {
                 });
 
-        assertNotNull(actualPage);
-        assertEquals(1, actualPage.getTotalElements());
-        assertEquals(PAGE_SIZE, actualPage.getSize());
-        EqualsBuilder.reflectionEquals(actualPage.getContent().getFirst(), expectedBookDto);
+        assertNotNull(actualBookDtosPage);
+        assertEquals(1, actualBookDtosPage.getTotalElements());
+        assertEquals(PAGE_SIZE, actualBookDtosPage.getSize());
+        EqualsBuilder.reflectionEquals(actualBookDtosPage.getContent().getFirst(), expectedBookDto);
     }
 
     @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
@@ -110,17 +110,17 @@ public class BookControllerTests {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void getById_ValidId_Success() throws Exception {
         //Given
-        BookDto expected = createBookDtoSample();
-        expected.setId(1L);
+        BookDto expectedBookDto = createBookDtoSample();
+        expectedBookDto.setId(1L);
         //When
         MvcResult result = mockMvc.perform(get("/books/1"))
                 .andExpect(status().isOk())
                 .andReturn();
         //Then
-        BookDto actual = objectMapper.readValue(result.getResponse()
+        BookDto actualBookDto = objectMapper.readValue(result.getResponse()
                 .getContentAsString(), BookDto.class);
-        assertNotNull(actual);
-        EqualsBuilder.reflectionEquals(expected, actual);
+        assertNotNull(actualBookDto);
+        EqualsBuilder.reflectionEquals(actualBookDto, expectedBookDto);
     }
 
     @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
@@ -130,7 +130,7 @@ public class BookControllerTests {
              Testing search functionality for books with valid query parameters
             """)
     @Sql(scripts = {
-            "classpath:database/categories/insert_one_category.sql",
+            "classpath:database/categories/insert_three_categories.sql",
             "classpath:database/books/insert_three_books.sql",
             "classpath:database/books_categories/insert_book_category_relation_for_three_books.sql"
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -157,14 +157,14 @@ public class BookControllerTests {
                 .andExpect(status().isOk())
                 .andReturn();
         //Then
-        PageResponse<BookDto> actualPage = objectMapper.readValue(result.getResponse()
+        PageResponse<BookDto> actualBookDtosPage = objectMapper.readValue(result.getResponse()
                 .getContentAsString(), new TypeReference<>() {
                 });
 
-        assertNotNull(actualPage);
-        assertEquals(1, actualPage.getTotalElements());
-        assertEquals(PAGE_SIZE, actualPage.getSize());
-        EqualsBuilder.reflectionEquals(actualPage.getContent().getFirst(), expectedBookDto);
+        assertNotNull(actualBookDtosPage);
+        assertEquals(1, actualBookDtosPage.getTotalElements());
+        assertEquals(PAGE_SIZE, actualBookDtosPage.getSize());
+        EqualsBuilder.reflectionEquals(actualBookDtosPage.getContent().getFirst(), expectedBookDto);
     }
 
     @WithMockUser(username = "admin", authorities = "ADMIN")
@@ -181,7 +181,7 @@ public class BookControllerTests {
     void createBook_ValidRequestDto_Success() throws Exception {
         //Given
         CreateBookRequestDto requestDto = createBookRequestDtoSample();
-        BookDto expected = createBookDtoSample();
+        BookDto expectedBookDto = createBookDtoSample();
 
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
@@ -195,11 +195,11 @@ public class BookControllerTests {
                 .andReturn();
 
         //Then
-        BookDto actual = objectMapper.readValue(result.getResponse()
+        BookDto actualBookDto = objectMapper.readValue(result.getResponse()
                 .getContentAsString(), BookDto.class);
-        assertNotNull(actual);
-        assertNotNull(actual.getId());
-        EqualsBuilder.reflectionEquals(expected, actual, "id");
+        assertNotNull(actualBookDto);
+        assertNotNull(actualBookDto.getId());
+        EqualsBuilder.reflectionEquals(actualBookDto, expectedBookDto, "id");
     }
 
     @WithMockUser(username = "admin", authorities = "ADMIN")
@@ -221,10 +221,10 @@ public class BookControllerTests {
         requestDto.setTitle("NewTitle");
         requestDto.setAuthor("NewAuthor");
 
-        BookDto expected = createBookDtoSample();
-        expected.setId(1L);
-        expected.setTitle("NewTitle");
-        expected.setAuthor("NewAuthor");
+        BookDto expectedBookDto = createBookDtoSample();
+        expectedBookDto.setId(1L);
+        expectedBookDto.setTitle("NewTitle");
+        expectedBookDto.setAuthor("NewAuthor");
 
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
@@ -238,11 +238,11 @@ public class BookControllerTests {
                 .andReturn();
 
         //Then
-        BookDto actual = objectMapper.readValue(result.getResponse()
+        BookDto actualBookDto = objectMapper.readValue(result.getResponse()
                 .getContentAsString(), BookDto.class);
-        assertNotNull(actual);
-        assertNotNull(actual.getId());
-        EqualsBuilder.reflectionEquals(expected, actual);
+        assertNotNull(actualBookDto);
+        assertNotNull(actualBookDto.getId());
+        EqualsBuilder.reflectionEquals(actualBookDto, expectedBookDto);
     }
 
     @WithMockUser(username = "admin", authorities = "ADMIN")
@@ -259,8 +259,6 @@ public class BookControllerTests {
     @Sql(scripts = "classpath:database/clear_database.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void deleteBook_ValidId_Success() throws Exception {
-        //Given
-
         //When
         MvcResult result = mockMvc.perform(delete("/books/1"))
                 .andExpect(status().isNoContent())

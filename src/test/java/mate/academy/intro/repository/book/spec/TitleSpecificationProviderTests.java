@@ -49,13 +49,13 @@ public class TitleSpecificationProviderTests {
             """)
     void getKey_returnsCorrectKey() {
         //Given
-        String expected = TITLE;
+        String expectedKey = TITLE;
 
         //When
-        String actual = titleSpecificationProvider.getKey();
+        String actualKey = titleSpecificationProvider.getKey();
 
         //Then
-        assertEquals(expected, actual);
+        assertEquals(actualKey, expectedKey);
     }
 
     @Test

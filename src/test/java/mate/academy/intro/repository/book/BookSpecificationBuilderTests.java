@@ -61,10 +61,10 @@ public class BookSpecificationBuilderTests {
         when(titleSpecificationProvider.getSpecification(title)).thenReturn(mockTitleSpec);
 
         //When
-        Specification<Book> spec = bookSpecificationBuilder.build(searchParameters);
+        Specification<Book> actualSpec = bookSpecificationBuilder.build(searchParameters);
 
         //Then
-        assertNotNull(spec);
+        assertNotNull(actualSpec);
         verify(bookSpecificationProviderManager)
                 .getSpecificationProvider(BookSpecificationBuilder.TITLE);
         verify(titleSpecificationProvider).getSpecification(title);
@@ -87,10 +87,10 @@ public class BookSpecificationBuilderTests {
         when(authorSpecificationProvider.getSpecification(author)).thenReturn(mockAuthorSpec);
 
         //When
-        Specification<Book> spec = bookSpecificationBuilder.build(searchParameters);
+        Specification<Book> actualSpec = bookSpecificationBuilder.build(searchParameters);
 
         //Then
-        assertNotNull(spec);
+        assertNotNull(actualSpec);
         verify(bookSpecificationProviderManager)
                 .getSpecificationProvider(BookSpecificationBuilder.AUTHOR);
         verify(authorSpecificationProvider).getSpecification(author);
@@ -113,10 +113,10 @@ public class BookSpecificationBuilderTests {
         when(isbnSpecificationProvider.getSpecification(isbn)).thenReturn(mockIsbnSpec);
 
         //When
-        Specification<Book> spec = bookSpecificationBuilder.build(searchParameters);
+        Specification<Book> actualSpec = bookSpecificationBuilder.build(searchParameters);
 
         //Then
-        assertNotNull(spec);
+        assertNotNull(actualSpec);
         verify(bookSpecificationProviderManager)
                 .getSpecificationProvider(BookSpecificationBuilder.ISBN);
         verify(isbnSpecificationProvider).getSpecification(isbn);
@@ -142,10 +142,10 @@ public class BookSpecificationBuilderTests {
         when(priceSpecificationProvider.getSpecification(priceRange)).thenReturn(mockPriceSpec);
 
         //When
-        Specification<Book> spec = bookSpecificationBuilder.build(searchParameters);
+        Specification<Book> actualSpec = bookSpecificationBuilder.build(searchParameters);
 
         //Then
-        assertNotNull(spec);
+        assertNotNull(actualSpec);
         verify(bookSpecificationProviderManager)
                 .getSpecificationProvider(BookSpecificationBuilder.PRICE);
         verify(priceSpecificationProvider).getSpecification(priceRange);
@@ -169,10 +169,10 @@ public class BookSpecificationBuilderTests {
         when(priceSpecificationProvider.getSpecification(priceRange)).thenReturn(mockPriceSpec);
 
         //When
-        Specification<Book> spec = bookSpecificationBuilder.build(searchParameters);
+        Specification<Book> actualSpec = bookSpecificationBuilder.build(searchParameters);
 
         //Then
-        assertNotNull(spec);
+        assertNotNull(actualSpec);
         verify(bookSpecificationProviderManager)
                 .getSpecificationProvider(BookSpecificationBuilder.PRICE);
         verify(priceSpecificationProvider).getSpecification(priceRange);
@@ -196,10 +196,10 @@ public class BookSpecificationBuilderTests {
         when(priceSpecificationProvider.getSpecification(priceRange)).thenReturn(mockPriceSpec);
 
         //When
-        Specification<Book> spec = bookSpecificationBuilder.build(searchParameters);
+        Specification<Book> actualSpec = bookSpecificationBuilder.build(searchParameters);
 
         //Then
-        assertNotNull(spec);
+        assertNotNull(actualSpec);
         verify(bookSpecificationProviderManager)
                 .getSpecificationProvider(BookSpecificationBuilder.PRICE);
         verify(priceSpecificationProvider).getSpecification(priceRange);
@@ -216,10 +216,10 @@ public class BookSpecificationBuilderTests {
                 null, null, null, null, null);
 
         //When
-        Specification<Book> spec = bookSpecificationBuilder.build(searchParameters);
+        Specification<Book> actualSpec = bookSpecificationBuilder.build(searchParameters);
 
         //Then
-        assertNotNull(spec);
+        assertNotNull(actualSpec);
     }
 
     @Test
@@ -235,9 +235,9 @@ public class BookSpecificationBuilderTests {
                 "", "", "", bottomPrice, upperPrice);
 
         //When
-        Specification<Book> spec = bookSpecificationBuilder.build(searchParameters);
+        Specification<Book> actualSpec = bookSpecificationBuilder.build(searchParameters);
 
         //Then
-        assertNotNull(spec);
+        assertNotNull(actualSpec);
     }
 }

@@ -50,7 +50,7 @@ public class CategoryController {
     public Page<CategoryDto> getAllCategories(@ParameterObject @PageableDefault(
             sort = {NAME, DESCRIPTION}, direction = Sort.Direction.ASC
     ) Pageable pageable) {
-        return categoryService.findAll(pageable);
+        return categoryService.getAll(pageable);
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
@@ -76,6 +76,7 @@ public class CategoryController {
         return categoryService.getBooksByCategoryId(pageable, id);
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     @Operation(
@@ -84,7 +85,7 @@ public class CategoryController {
                     + "(Required roles: ADMIN)"
     )
     public CategoryDto createCategory(@RequestBody @Valid CreateCategoryRequestDto categoryDto) {
-        return categoryService.save(categoryDto);
+        return categoryService.create(categoryDto);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -94,9 +95,9 @@ public class CategoryController {
             description = "Update category by the given ID with the provided parameters "
                     + "(Required roles: ADMIN)"
     )
-    public CategoryDto updateCategory(@PathVariable Long id,
+    public CategoryDto updateCategoryById(@PathVariable Long id,
                                       @RequestBody @Valid CreateCategoryRequestDto categoryDto) {
-        return categoryService.update(id, categoryDto);
+        return categoryService.updateById(id, categoryDto);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")

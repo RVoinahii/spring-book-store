@@ -47,18 +47,18 @@ public class BookRepositoryTests {
         Pageable pageable = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
 
         //When
-        Page<Book> actual = bookRepository.findAllByCategoryId(pageable, VALID_ID_SAMPLE);
+        Page<Book> actualBooksPage = bookRepository.findAllByCategoryId(pageable, VALID_ID_SAMPLE);
 
         //Then
-        assertEquals(1, actual.getContent().size(),
+        assertEquals(1, actualBooksPage.getContent().size(),
                 "Expected exactly one book to be returned for a valid category ID");
-        assertEquals(1, actual.getTotalElements(),
+        assertEquals(1, actualBooksPage.getTotalElements(),
                 "Total elements should be exactly 1");
-        assertEquals(VALID_ID_SAMPLE, actual.getContent().getFirst().getId(),
+        assertEquals(VALID_ID_SAMPLE, actualBooksPage.getContent().getFirst().getId(),
                 "Returned book should have the expected category ID");
-        assertEquals(PAGE_NUMBER, actual.getNumber(),
+        assertEquals(PAGE_NUMBER, actualBooksPage.getNumber(),
                 "Page number should match the requested page");
-        assertEquals(PAGE_SIZE, actual.getSize(),
+        assertEquals(PAGE_SIZE, actualBooksPage.getSize(),
                 "Page size should match the requested size");
     }
 
@@ -72,16 +72,17 @@ public class BookRepositoryTests {
         Pageable pageable = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
 
         //When
-        Page<Book> actual = bookRepository.findAllByCategoryId(pageable, INVALID_ID_SAMPLE);
+        Page<Book> actualBooksPage = bookRepository.findAllByCategoryId(
+                pageable, INVALID_ID_SAMPLE);
 
         //Then
-        assertTrue(actual.getContent().isEmpty(),
+        assertTrue(actualBooksPage.getContent().isEmpty(),
                 "Expected empty result for invalid category ID");
-        assertEquals(0, actual.getTotalElements(),
+        assertEquals(0, actualBooksPage.getTotalElements(),
                 "Total elements should be 0 for an invalid category ID");
-        assertEquals(PAGE_NUMBER, actual.getNumber(),
+        assertEquals(PAGE_NUMBER, actualBooksPage.getNumber(),
                 "Page number should match the requested page");
-        assertEquals(PAGE_SIZE, actual.getSize(),
+        assertEquals(PAGE_SIZE, actualBooksPage.getSize(),
                 "Page size should match the requested size");
     }
 }

@@ -49,13 +49,13 @@ public class AuthorSpecificationProviderTests {
             """)
     void getKey_returnsCorrectKey() {
         //Given
-        String expected = AUTHOR;
+        String expectedKey = AUTHOR;
 
         //When
-        String actual = authorSpecificationProvider.getKey();
+        String actualKey = authorSpecificationProvider.getKey();
 
         //Then
-        assertEquals(expected, actual);
+        assertEquals(actualKey, expectedKey);
     }
 
     @Test

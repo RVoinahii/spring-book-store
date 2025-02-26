@@ -37,8 +37,8 @@ import org.springframework.data.jpa.domain.Specification;
 @ExtendWith(MockitoExtension.class)
 public class BookServiceTests {
     private static final Long BOOK_ID = 1L;
-    private static final String BOOK_TITLE = "Book1";
-    private static final String BOOK_AUTHOR = "Author1";
+    private static final String BOOK_TITLE = "BookOne";
+    private static final String BOOK_AUTHOR = "AuthorOne";
     private static final String BOOK_ISBN = "978-3-16-148410-0";
     private static final BigDecimal BOOK_PRICE = BigDecimal.valueOf(39.99);
 
@@ -56,30 +56,6 @@ public class BookServiceTests {
 
     @Test
     @DisplayName("""
-            create():
-             Should return the correct BookDto when a book is successfully created
-            """)
-    void create_ValidCreateBookRequestDto_ReturnsBookDto() {
-        //Given
-        CreateBookRequestDto requestDto = createBookRequestDtoSample();
-        Book book = createBookSample(BOOK_ID);
-        BookDto bookDto = createBookDtoSample(book);
-
-        when(bookMapper.toEntity(requestDto)).thenReturn(book);
-        when(bookRepository.save(book)).thenReturn(book);
-        when(bookMapper.toDto(book)).thenReturn(bookDto);
-
-        //When
-        BookDto savedBookDto = bookService.create(requestDto);
-
-        //Then
-        assertThat(savedBookDto).isEqualTo(bookDto);
-        verify(bookRepository, times(1)).save(book);
-        verifyNoMoreInteractions(bookRepository, bookMapper);
-    }
-
-    @Test
-    @DisplayName("""
             getAll():
              Should return correct Page<BookDto> when pageable is valid
             """)
@@ -87,20 +63,20 @@ public class BookServiceTests {
         //Given
         Pageable pageable = PageRequest.of(0, 10);
         Book book = createBookSample(BOOK_ID);
-        BookDto bookDto = createBookDtoSample(book);
+        BookDto expectedBookDto = createBookDtoSample(book);
 
         List<Book> books = List.of(book);
         Page<Book> bookPage = new PageImpl<>(books, pageable, books.size());
 
         when(bookRepository.findAll(pageable)).thenReturn(bookPage);
-        when(bookMapper.toDto(book)).thenReturn(bookDto);
+        when(bookMapper.toDto(book)).thenReturn(expectedBookDto);
 
         //When
-        Page<BookDto> bookDtos = bookService.getAll(pageable);
+        Page<BookDto> actualBookDtosPage = bookService.getAll(pageable);
 
         //Then
-        assertThat(bookDtos).hasSize(1);
-        assertThat(bookDtos.getContent().getFirst()).isEqualTo(bookDto);
+        assertThat(actualBookDtosPage).hasSize(1);
+        assertThat(actualBookDtosPage.getContent().getFirst()).isEqualTo(expectedBookDto);
         verify(bookRepository, times(1)).findAll(pageable);
         verify(bookMapper, times(1)).toDto(book);
         verifyNoMoreInteractions(bookRepository, bookMapper);
@@ -114,16 +90,16 @@ public class BookServiceTests {
     void getById_WithValidBookId_ShouldReturnValidBookDto() {
         //Given
         Book book = createBookSample(BOOK_ID);
-        BookDto bookDto = createBookDtoSample(book);
+        BookDto expectedBookDto = createBookDtoSample(book);
 
         when(bookRepository.findById(BOOK_ID)).thenReturn(Optional.of(book));
-        when(bookMapper.toDto(book)).thenReturn(bookDto);
+        when(bookMapper.toDto(book)).thenReturn(expectedBookDto);
 
         //When
-        BookDto bookDtoById = bookService.getById(BOOK_ID);
+        BookDto actualBookDto = bookService.getById(BOOK_ID);
 
         //Then
-        assertThat(bookDtoById).isEqualTo(bookDto);
+        assertThat(actualBookDto).isEqualTo(expectedBookDto);
         verify(bookRepository, times(1)).findById(BOOK_ID);
         verifyNoMoreInteractions(bookRepository, bookMapper);
     }
@@ -167,22 +143,46 @@ public class BookServiceTests {
         Book bookSampleWithTitleJava = createBookSample(BOOK_ID);
         bookSampleWithTitleJava.setTitle("Java");
 
-        BookDto bookDtoSampleWithTitleJava = createBookDtoSample(bookSampleWithTitleJava);
+        BookDto expectedBookDto = createBookDtoSample(bookSampleWithTitleJava);
 
         List<Book> books = List.of(bookSampleWithTitleJava);
         Page<Book> bookPage = new PageImpl<>(books, pageable, 1);
 
         when(bookRepository.findAll(eq(bookSpecification), eq(pageable))).thenReturn(bookPage);
-        when(bookMapper.toDto(bookSampleWithTitleJava)).thenReturn(bookDtoSampleWithTitleJava);
+        when(bookMapper.toDto(bookSampleWithTitleJava)).thenReturn(expectedBookDto);
 
         //When
-        Page<BookDto> bookDtos = bookService.search(searchParameters, pageable);
+        Page<BookDto> actualBookDtosPage = bookService.search(searchParameters, pageable);
 
         //Then
-        assertThat(bookDtos).hasSize(1);
-        assertThat(bookDtoSampleWithTitleJava).isEqualTo(bookDtos.getContent().getFirst());
+        assertThat(actualBookDtosPage).hasSize(1);
+        assertThat(actualBookDtosPage.getContent().getFirst()).isEqualTo(expectedBookDto);
         verify(bookRepository, times(1)).findAll(bookSpecification, pageable);
         verify(bookMapper, times(1)).toDto(bookSampleWithTitleJava);
+        verifyNoMoreInteractions(bookRepository, bookMapper);
+    }
+
+    @Test
+    @DisplayName("""
+            create():
+             Should return the correct BookDto when a book is successfully created
+            """)
+    void create_ValidCreateBookRequestDto_ReturnsBookDto() {
+        //Given
+        CreateBookRequestDto requestDto = createBookRequestDtoSample();
+        Book book = createBookSample(BOOK_ID);
+        BookDto expectedBookDto = createBookDtoSample(book);
+
+        when(bookMapper.toEntity(requestDto)).thenReturn(book);
+        when(bookRepository.save(book)).thenReturn(book);
+        when(bookMapper.toDto(book)).thenReturn(expectedBookDto);
+
+        //When
+        BookDto actualBookDto = bookService.create(requestDto);
+
+        //Then
+        assertThat(actualBookDto).isEqualTo(expectedBookDto);
+        verify(bookRepository, times(1)).save(book);
         verifyNoMoreInteractions(bookRepository, bookMapper);
     }
 

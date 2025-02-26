@@ -61,15 +61,15 @@ public class BookSpecificationProviderManagerTests {
             """)
     void getSpecificationProvider_validKeyAuthor_returnsProvider() {
         //Given
-        String key = AUTHOR;
+        String expectedKey = AUTHOR;
 
         //When
         SpecificationProvider<Book> specificationProvider =
-                bookSpecificationProviderManager.getSpecificationProvider(key);
+                bookSpecificationProviderManager.getSpecificationProvider(expectedKey);
 
         //Then
         assertNotNull(specificationProvider);
-        assertThat(key).isEqualTo(specificationProvider.getKey());
+        assertThat(expectedKey).isEqualTo(specificationProvider.getKey());
     }
 
     @Test
@@ -79,15 +79,15 @@ public class BookSpecificationProviderManagerTests {
             """)
     void getSpecificationProvider_validKeyIsbn_returnsProvider() {
         //Given
-        String key = ISBN;
+        String expectedKey = ISBN;
 
         //When
         SpecificationProvider<Book> specificationProvider =
-                bookSpecificationProviderManager.getSpecificationProvider(key);
+                bookSpecificationProviderManager.getSpecificationProvider(expectedKey);
 
         //Then
         assertNotNull(specificationProvider);
-        assertThat(key).isEqualTo(specificationProvider.getKey());
+        assertThat(expectedKey).isEqualTo(specificationProvider.getKey());
     }
 
     @Test
@@ -97,15 +97,15 @@ public class BookSpecificationProviderManagerTests {
             """)
     void getSpecificationProvider_validKeyPrice_returnsProvider() {
         //Given
-        String key = PRICE;
+        String expectedKey = PRICE;
 
         //When
         SpecificationProvider<Book> specificationProvider =
-                bookSpecificationProviderManager.getSpecificationProvider(key);
+                bookSpecificationProviderManager.getSpecificationProvider(expectedKey);
 
         //Then
         assertNotNull(specificationProvider);
-        assertThat(key).isEqualTo(specificationProvider.getKey());
+        assertThat(expectedKey).isEqualTo(specificationProvider.getKey());
     }
 
     @Test
@@ -115,15 +115,15 @@ public class BookSpecificationProviderManagerTests {
             """)
     void getSpecificationProvider_validKeyTitle_returnsProvider() {
         //Given
-        String key = TITLE;
+        String expectedKey = TITLE;
 
         //When
         SpecificationProvider<Book> specificationProvider =
-                bookSpecificationProviderManager.getSpecificationProvider(key);
+                bookSpecificationProviderManager.getSpecificationProvider(expectedKey);
 
         //Then
         assertNotNull(specificationProvider);
-        assertThat(key).isEqualTo(specificationProvider.getKey());
+        assertThat(expectedKey).isEqualTo(specificationProvider.getKey());
     }
 
     @Test

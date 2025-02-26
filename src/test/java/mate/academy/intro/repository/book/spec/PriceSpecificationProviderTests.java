@@ -51,13 +51,13 @@ public class PriceSpecificationProviderTests {
             """)
     void getKey_returnsCorrectKey() {
         //Given
-        String expected = PRICE;
+        String expectedKey = PRICE;
 
         //When
-        String actual = priceSpecificationProvider.getKey();
+        String actualKey = priceSpecificationProvider.getKey();
 
         //Then
-        assertEquals(expected, actual);
+        assertEquals(actualKey, expectedKey);
     }
 
     @Test

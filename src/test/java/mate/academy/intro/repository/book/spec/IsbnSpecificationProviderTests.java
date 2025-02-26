@@ -48,13 +48,13 @@ public class IsbnSpecificationProviderTests {
             """)
     void getKey_returnsCorrectKey() {
         //Given
-        String expected = ISBN;
+        String expectedKey = ISBN;
 
         //When
-        String actual = isbnSpecificationProvider.getKey();
+        String actualKey = isbnSpecificationProvider.getKey();
 
         //Then
-        assertEquals(expected, actual);
+        assertEquals(actualKey, expectedKey);
     }
 
     @Test

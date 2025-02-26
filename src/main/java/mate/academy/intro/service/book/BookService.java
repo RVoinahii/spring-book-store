@@ -7,13 +7,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface BookService {
-    BookDto create(CreateBookRequestDto bookDto);
-
     Page<BookDto> getAll(Pageable pageable);
 
     BookDto getById(Long id);
 
     Page<BookDto> search(BookSearchParameters params, Pageable pageable);
+
+    BookDto create(CreateBookRequestDto bookDto);
 
     BookDto updateById(Long id, CreateBookRequestDto bookDto);
 

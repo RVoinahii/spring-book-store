@@ -25,7 +25,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final BookMapper bookMapper;
 
     @Override
-    public Page<CategoryDto> findAll(Pageable pageable) {
+    public Page<CategoryDto> getAll(Pageable pageable) {
         return categoryRepository.findAll(pageable)
                 .map(categoryMapper::toDto);
     }
@@ -45,13 +45,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto save(CreateCategoryRequestDto categoryDto) {
+    public CategoryDto create(CreateCategoryRequestDto categoryDto) {
         Category category = categoryMapper.toEntity(categoryDto);
         return categoryMapper.toDto(categoryRepository.save(category));
     }
 
     @Override
-    public CategoryDto update(Long id, CreateCategoryRequestDto updatedCategoryDataDto) {
+    public CategoryDto updateById(Long id, CreateCategoryRequestDto updatedCategoryDataDto) {
         Category existingCategory = categoryRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Can't find category by id: " + id));
         categoryMapper.updateCategoryFromDto(updatedCategoryDataDto, existingCategory);
