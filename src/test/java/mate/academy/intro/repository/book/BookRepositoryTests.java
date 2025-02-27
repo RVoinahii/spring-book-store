@@ -1,5 +1,10 @@
 package mate.academy.intro.repository.book;
 
+import static mate.academy.intro.util.TestDataUtil.BOOK_ID;
+import static mate.academy.intro.util.TestDataUtil.CATEGORY_ID;
+import static mate.academy.intro.util.TestDataUtil.INVALID_ID_SAMPLE;
+import static mate.academy.intro.util.TestDataUtil.PAGE_NUMBER;
+import static mate.academy.intro.util.TestDataUtil.PAGE_SIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -22,11 +27,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public class BookRepositoryTests {
     private static CustomMySqlContainer mySqlContainer = CustomMySqlContainer.getInstance();
 
-    private static final int PAGE_NUMBER = 0;
-    private static final int PAGE_SIZE = 10;
-    private static final Long VALID_ID_SAMPLE = 1L;
-    private static final Long INVALID_ID_SAMPLE = 99L;
-
     @Autowired
     private BookRepository bookRepository;
 
@@ -47,14 +47,14 @@ public class BookRepositoryTests {
         Pageable pageable = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
 
         //When
-        Page<Book> actualBooksPage = bookRepository.findAllByCategoryId(pageable, VALID_ID_SAMPLE);
+        Page<Book> actualBooksPage = bookRepository.findAllByCategoryId(pageable, CATEGORY_ID);
 
         //Then
         assertEquals(1, actualBooksPage.getContent().size(),
                 "Expected exactly one book to be returned for a valid category ID");
         assertEquals(1, actualBooksPage.getTotalElements(),
                 "Total elements should be exactly 1");
-        assertEquals(VALID_ID_SAMPLE, actualBooksPage.getContent().getFirst().getId(),
+        assertEquals(BOOK_ID, actualBooksPage.getContent().getFirst().getId(),
                 "Returned book should have the expected category ID");
         assertEquals(PAGE_NUMBER, actualBooksPage.getNumber(),
                 "Page number should match the requested page");

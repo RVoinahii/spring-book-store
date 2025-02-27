@@ -1,5 +1,8 @@
 package mate.academy.intro.controller;
 
+import static mate.academy.intro.util.TestDataUtil.PAGE_SIZE;
+import static mate.academy.intro.util.TestDataUtil.createBookRequestDtoSample;
+import static mate.academy.intro.util.TestDataUtil.createDefaultBookDtoSample;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -11,8 +14,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.math.BigDecimal;
-import java.util.List;
 import mate.academy.intro.dto.book.BookDto;
 import mate.academy.intro.dto.book.CreateBookRequestDto;
 import mate.academy.intro.model.PageResponse;
@@ -22,7 +23,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.jdbc.Sql;
@@ -35,16 +35,6 @@ import org.testcontainers.shaded.org.apache.commons.lang3.builder.EqualsBuilder;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class BookControllerTests {
     protected static MockMvc mockMvc;
-
-    private static final String BOOK_TITLE = "BookOne";
-    private static final String BOOK_AUTHOR = "AuthorOne";
-    private static final String BOOK_ISBN = "978-3-16-148410-0";
-    private static final BigDecimal BOOK_PRICE = BigDecimal.valueOf(9.99);
-
-    private static final int PAGE_SIZE = 10;
-
-    @Autowired
-    private TestRestTemplate restTemplate;
 
     @Autowired
     private BookService bookService;
@@ -77,7 +67,7 @@ public class BookControllerTests {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void getAllBooks_ValidPageable_Success() throws Exception {
         //Given
-        BookDto expectedBookDto = createBookDtoSample();
+        BookDto expectedBookDto = createDefaultBookDtoSample();
         expectedBookDto.setId(1L);
 
         //When
@@ -110,7 +100,7 @@ public class BookControllerTests {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void getById_ValidId_Success() throws Exception {
         //Given
-        BookDto expectedBookDto = createBookDtoSample();
+        BookDto expectedBookDto = createDefaultBookDtoSample();
         expectedBookDto.setId(1L);
         //When
         MvcResult result = mockMvc.perform(get("/books/1"))
@@ -141,7 +131,7 @@ public class BookControllerTests {
         String expectedIsbn = "978-3-16-148410-2";
         Long expectedId = 3L;
 
-        BookDto expectedBookDto = createBookDtoSample();
+        BookDto expectedBookDto = createDefaultBookDtoSample();
         expectedBookDto.setId(expectedId);
         expectedBookDto.setIsbn(expectedIsbn);
 
@@ -181,7 +171,7 @@ public class BookControllerTests {
     void createBook_ValidRequestDto_Success() throws Exception {
         //Given
         CreateBookRequestDto requestDto = createBookRequestDtoSample();
-        BookDto expectedBookDto = createBookDtoSample();
+        BookDto expectedBookDto = createDefaultBookDtoSample();
 
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
@@ -221,7 +211,7 @@ public class BookControllerTests {
         requestDto.setTitle("NewTitle");
         requestDto.setAuthor("NewAuthor");
 
-        BookDto expectedBookDto = createBookDtoSample();
+        BookDto expectedBookDto = createDefaultBookDtoSample();
         expectedBookDto.setId(1L);
         expectedBookDto.setTitle("NewTitle");
         expectedBookDto.setAuthor("NewAuthor");
@@ -265,25 +255,5 @@ public class BookControllerTests {
                 .andReturn();
         //Then
         mockMvc.perform(get("/books/1")).andExpect(status().isNotFound());
-    }
-
-    private CreateBookRequestDto createBookRequestDtoSample() {
-        CreateBookRequestDto requestDto = new CreateBookRequestDto();
-        requestDto.setTitle(BOOK_TITLE);
-        requestDto.setAuthor(BOOK_AUTHOR);
-        requestDto.setIsbn(BOOK_ISBN);
-        requestDto.setPrice(BOOK_PRICE);
-        requestDto.setCategories(List.of(1L));
-        return requestDto;
-    }
-
-    private BookDto createBookDtoSample() {
-        BookDto bookDto = new BookDto();
-        bookDto.setTitle(BOOK_TITLE);
-        bookDto.setAuthor(BOOK_AUTHOR);
-        bookDto.setIsbn(BOOK_ISBN);
-        bookDto.setPrice(BOOK_PRICE);
-        bookDto.setCategoryIds(List.of(1L));
-        return bookDto;
     }
 }

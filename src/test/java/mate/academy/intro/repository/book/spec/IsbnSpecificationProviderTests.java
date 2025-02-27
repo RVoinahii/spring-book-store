@@ -22,7 +22,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 @ExtendWith(MockitoExtension.class)
 public class IsbnSpecificationProviderTests {
-
     @InjectMocks
     private IsbnSpecificationProvider isbnSpecificationProvider;
 

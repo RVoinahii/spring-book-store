@@ -1,5 +1,9 @@
 package mate.academy.intro.controller;
 
+import static mate.academy.intro.util.TestDataUtil.PAGE_SIZE;
+import static mate.academy.intro.util.TestDataUtil.createCategoryRequestDtoSample;
+import static mate.academy.intro.util.TestDataUtil.createDefaultBookWithoutCategoriesDtoSample;
+import static mate.academy.intro.util.TestDataUtil.createDefaultCategoryDtoSample;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -11,7 +15,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.math.BigDecimal;
 import mate.academy.intro.dto.book.BookWithoutCategoriesDto;
 import mate.academy.intro.dto.category.CategoryDto;
 import mate.academy.intro.dto.category.CreateCategoryRequestDto;
@@ -22,7 +25,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.jdbc.Sql;
@@ -35,18 +37,6 @@ import org.testcontainers.shaded.org.apache.commons.lang3.builder.EqualsBuilder;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CategoryControllerTests {
     protected static MockMvc mockMvc;
-
-    private static final Long CATEGORY_ID = 1L;
-    private static final String CATEGORY_TITLE = "Category1";
-    private static final String BOOK_TITLE = "BookOne";
-    private static final String BOOK_AUTHOR = "AuthorOne";
-    private static final String BOOK_ISBN = "978-3-16-148410-0";
-    private static final BigDecimal BOOK_PRICE = BigDecimal.valueOf(9.99);
-
-    private static final int PAGE_SIZE = 10;
-
-    @Autowired
-    private TestRestTemplate restTemplate;
 
     @Autowired
     private CategoryService categoryService;
@@ -76,7 +66,7 @@ public class CategoryControllerTests {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void getAllCategories_ValidPageable_Success() throws Exception {
         //Given
-        CategoryDto expectedCategoryDto = createCategoryDtoSample();
+        CategoryDto expectedCategoryDto = createDefaultCategoryDtoSample();
         expectedCategoryDto.setId(1L);
 
         //When
@@ -107,7 +97,7 @@ public class CategoryControllerTests {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void getCategoryById_ValidId_Success() throws Exception {
         //Given
-        CategoryDto expected = createCategoryDtoSample();
+        CategoryDto expected = createDefaultCategoryDtoSample();
         expected.setId(1L);
         //When
         MvcResult result = mockMvc.perform(get("/categories/1"))
@@ -138,7 +128,7 @@ public class CategoryControllerTests {
         //Given
         Long expectedBookId = 1L;
 
-        BookWithoutCategoriesDto expectedBookDto = createBookWithoutCategoriesDtoSample();
+        BookWithoutCategoriesDto expectedBookDto = createDefaultBookWithoutCategoriesDtoSample();
         expectedBookDto.setId(expectedBookId);
 
         //When
@@ -167,7 +157,7 @@ public class CategoryControllerTests {
     void createCategory_ValidRequestDto_Success() throws Exception {
         //Given
         CreateCategoryRequestDto requestDto = createCategoryRequestDtoSample();
-        CategoryDto expected = createCategoryDtoSample();
+        CategoryDto expected = createDefaultCategoryDtoSample();
 
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
@@ -203,7 +193,7 @@ public class CategoryControllerTests {
         CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto(
                 "New Name", "New Description");
 
-        CategoryDto expected = createCategoryDtoSample();
+        CategoryDto expected = createDefaultCategoryDtoSample();
         expected.setId(1L);
         expected.setName(requestDto.name());
         expected.setDescription(requestDto.description());
@@ -244,25 +234,5 @@ public class CategoryControllerTests {
                 .andReturn();
         //Then
         mockMvc.perform(get("/categories/1")).andExpect(status().isNotFound());
-    }
-
-    private CreateCategoryRequestDto createCategoryRequestDtoSample() {
-        return new CreateCategoryRequestDto("CategoryOne", null);
-    }
-
-    private CategoryDto createCategoryDtoSample() {
-        CategoryDto categoryDto = new CategoryDto();
-        categoryDto.setId(CATEGORY_ID);
-        categoryDto.setName(CATEGORY_TITLE);
-        return categoryDto;
-    }
-
-    private BookWithoutCategoriesDto createBookWithoutCategoriesDtoSample() {
-        BookWithoutCategoriesDto bookDto = new BookWithoutCategoriesDto();
-        bookDto.setTitle(BOOK_TITLE);
-        bookDto.setAuthor(BOOK_AUTHOR);
-        bookDto.setIsbn(BOOK_ISBN);
-        bookDto.setPrice(BOOK_PRICE);
-        return bookDto;
     }
 }

@@ -1,17 +1,21 @@
 package mate.academy.intro.service.category;
 
+import static mate.academy.intro.util.TestDataUtil.BOOK_ID;
+import static mate.academy.intro.util.TestDataUtil.CATEGORY_ID;
+import static mate.academy.intro.util.TestDataUtil.createBookWithCustomCategorySample;
+import static mate.academy.intro.util.TestDataUtil.createCategoryRequestDtoSample;
+import static mate.academy.intro.util.TestDataUtil.createCategorySample;
+import static mate.academy.intro.util.TestDataUtil.createCustomBookWithoutCategoriesDtoSample;
+import static mate.academy.intro.util.TestDataUtil.createCustomCategoryDtoSample;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import mate.academy.intro.dto.book.BookWithoutCategoriesDto;
 import mate.academy.intro.dto.category.CategoryDto;
 import mate.academy.intro.dto.category.CreateCategoryRequestDto;
@@ -35,14 +39,6 @@ import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 public class CategoryServiceTests {
-    private static final Long BOOK_ID = 1L;
-    private static final Long CATEGORY_ID = 1L;
-    private static final String BOOK_TITLE = "BookOne";
-    private static final String CATEGORY_TITLE = "CategoryOne";
-    private static final String BOOK_AUTHOR = "AuthorOne";
-    private static final String BOOK_ISBN = "978-3-16-148410-0";
-    private static final BigDecimal BOOK_PRICE = BigDecimal.valueOf(39.99);
-
     @InjectMocks
     private CategoryServiceImpl categoryService;
 
@@ -67,7 +63,7 @@ public class CategoryServiceTests {
         //Given
         Pageable pageable = PageRequest.of(0, 10);
         Category category = createCategorySample(CATEGORY_ID);
-        CategoryDto expectedCategoryDto = createCategoryDtoSample(category);
+        CategoryDto expectedCategoryDto = createCustomCategoryDtoSample(category);
 
         List<Category> categories = List.of(category);
         Page<Category> categoryPage = new PageImpl<>(categories, pageable, categories.size());
@@ -81,8 +77,8 @@ public class CategoryServiceTests {
         //Then
         assertThat(actualCategoryDtoPage).hasSize(1);
         assertThat(actualCategoryDtoPage.getContent().getFirst()).isEqualTo(expectedCategoryDto);
-        verify(categoryRepository, times(1)).findAll(pageable);
-        verify(categoryMapper, times(1)).toDto(category);
+        verify(categoryRepository).findAll(pageable);
+        verify(categoryMapper).toDto(category);
         verifyNoMoreInteractions(categoryRepository, categoryMapper);
     }
 
@@ -94,7 +90,7 @@ public class CategoryServiceTests {
     void getById_WithValidBookId_ShouldReturnValidBookDto() {
         //Given
         Category category = createCategorySample(CATEGORY_ID);
-        CategoryDto expectedCategoryDto = createCategoryDtoSample(category);
+        CategoryDto expectedCategoryDto = createCustomCategoryDtoSample(category);
 
         when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(category));
         when(categoryMapper.toDto(category)).thenReturn(expectedCategoryDto);
@@ -104,7 +100,7 @@ public class CategoryServiceTests {
 
         //Then
         assertThat(actualCategoryDtoById).isEqualTo(expectedCategoryDto);
-        verify(categoryRepository, times(1)).findById(CATEGORY_ID);
+        verify(categoryRepository).findById(CATEGORY_ID);
         verifyNoMoreInteractions(categoryRepository, categoryMapper);
     }
 
@@ -127,7 +123,7 @@ public class CategoryServiceTests {
         String actual = exception.getMessage();
 
         assertEquals(expected, actual);
-        verify(categoryRepository, times(1)).findById(CATEGORY_ID);
+        verify(categoryRepository).findById(CATEGORY_ID);
         verifyNoMoreInteractions(categoryRepository);
     }
 
@@ -143,8 +139,8 @@ public class CategoryServiceTests {
 
         Category category = createCategorySample(CATEGORY_ID);
 
-        Book book = createBookSample(BOOK_ID, category);
-        BookWithoutCategoriesDto expectedBookDto = createBookWithoutCategoriesDtoSample(book);
+        Book book = createBookWithCustomCategorySample(BOOK_ID, category);
+        BookWithoutCategoriesDto expectedBookDto = createCustomBookWithoutCategoriesDtoSample(book);
 
         List<Book> books = List.of(book);
         Page<Book> bookPage = new PageImpl<>(books, pageable, books.size());
@@ -159,8 +155,8 @@ public class CategoryServiceTests {
         //Then
         assertThat(actualBookDtoPage).hasSize(1);
         assertThat(actualBookDtoPage.getContent().getFirst()).isEqualTo(expectedBookDto);
-        verify(bookRepository, times(1)).findAllByCategoryId(pageable, CATEGORY_ID);
-        verify(bookMapper, times(1)).toBookWithoutCategoriesDto(book);
+        verify(bookRepository).findAllByCategoryId(pageable, CATEGORY_ID);
+        verify(bookMapper).toBookWithoutCategoriesDto(book);
         verifyNoMoreInteractions(bookRepository, bookMapper);
     }
 
@@ -173,7 +169,7 @@ public class CategoryServiceTests {
         //Given
         CreateCategoryRequestDto requestDto = createCategoryRequestDtoSample();
         Category category = createCategorySample(CATEGORY_ID);
-        CategoryDto expectedCategoryDto = createCategoryDtoSample(category);
+        CategoryDto expectedCategoryDto = createCustomCategoryDtoSample(category);
 
         when(categoryMapper.toEntity(requestDto)).thenReturn(category);
         when(categoryRepository.save(category)).thenReturn(category);
@@ -184,7 +180,7 @@ public class CategoryServiceTests {
 
         //Then
         assertThat(actualCategoryDto).isEqualTo(expectedCategoryDto);
-        verify(categoryRepository, times(1)).save(category);
+        verify(categoryRepository).save(category);
         verifyNoMoreInteractions(categoryRepository, categoryMapper);
     }
 
@@ -204,7 +200,7 @@ public class CategoryServiceTests {
         updatedCategory.setName(requestDto.name());
         updatedCategory.setDescription(requestDto.description());
 
-        CategoryDto expectedCategoryDto = createCategoryDtoSample(updatedCategory);
+        CategoryDto expectedCategoryDto = createCustomCategoryDtoSample(updatedCategory);
 
         when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(existingCategory));
         when(categoryMapper.toDto(categoryRepository.save(updatedCategory)))
@@ -215,9 +211,9 @@ public class CategoryServiceTests {
 
         // Then
         assertThat(actualCategoryDto).isEqualTo(expectedCategoryDto);
-        verify(categoryRepository, times(1)).findById(CATEGORY_ID);
-        verify(categoryRepository, times(1)).save(updatedCategory);
-        verify(categoryMapper, times(1)).toDto(categoryRepository.save(updatedCategory));
+        verify(categoryRepository).findById(CATEGORY_ID);
+        verify(categoryRepository).save(updatedCategory);
+        verify(categoryMapper).toDto(categoryRepository.save(updatedCategory));
     }
 
     @Test
@@ -243,7 +239,7 @@ public class CategoryServiceTests {
         String actual = exception.getMessage();
 
         assertEquals(expected, actual);
-        verify(categoryRepository, times(1)).findById(CATEGORY_ID);
+        verify(categoryRepository).findById(CATEGORY_ID);
         verifyNoMoreInteractions(categoryRepository);
     }
 
@@ -260,46 +256,7 @@ public class CategoryServiceTests {
         categoryService.deleteById(bookId);
 
         //Then
-        verify(categoryRepository, times(1)).deleteById(bookId);
+        verify(categoryRepository).deleteById(bookId);
         verifyNoMoreInteractions(categoryRepository);
-    }
-
-    private CreateCategoryRequestDto createCategoryRequestDtoSample() {
-        return new CreateCategoryRequestDto("CategoryOne", null);
-    }
-
-    private Category createCategorySample(Long id) {
-        Category category = new Category();
-        category.setId(id);
-        category.setName(CATEGORY_TITLE);
-        return category;
-    }
-
-    private CategoryDto createCategoryDtoSample(Category category) {
-        CategoryDto categoryDto = new CategoryDto();
-        categoryDto.setId(categoryDto.getId());
-        categoryDto.setName(category.getName());
-        return categoryDto;
-    }
-
-    private Book createBookSample(Long id, Category category) {
-        Book book = new Book();
-        book.setId(id);
-        book.setTitle(BOOK_TITLE);
-        book.setAuthor(BOOK_AUTHOR);
-        book.setIsbn(BOOK_ISBN);
-        book.setPrice(BOOK_PRICE);
-        book.setCategories(Set.of(category));
-        return book;
-    }
-
-    private BookWithoutCategoriesDto createBookWithoutCategoriesDtoSample(Book book) {
-        BookWithoutCategoriesDto bookDto = new BookWithoutCategoriesDto();
-        bookDto.setId(book.getId());
-        bookDto.setTitle(book.getTitle());
-        bookDto.setAuthor(book.getAuthor());
-        bookDto.setIsbn(book.getIsbn());
-        bookDto.setPrice(book.getPrice());
-        return bookDto;
     }
 }

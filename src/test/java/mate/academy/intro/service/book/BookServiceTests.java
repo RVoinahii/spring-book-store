@@ -1,25 +1,25 @@
 package mate.academy.intro.service.book;
 
+import static mate.academy.intro.util.TestDataUtil.BOOK_ID;
+import static mate.academy.intro.util.TestDataUtil.createBookRequestDtoSample;
+import static mate.academy.intro.util.TestDataUtil.createBookSample;
+import static mate.academy.intro.util.TestDataUtil.createCustomBookDtoSample;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import mate.academy.intro.dto.book.BookDto;
 import mate.academy.intro.dto.book.BookSearchParameters;
 import mate.academy.intro.dto.book.CreateBookRequestDto;
 import mate.academy.intro.exceptions.EntityNotFoundException;
 import mate.academy.intro.mapper.BookMapper;
 import mate.academy.intro.model.Book;
-import mate.academy.intro.model.Category;
 import mate.academy.intro.repository.book.BookRepository;
 import mate.academy.intro.repository.book.BookSpecificationBuilder;
 import org.junit.jupiter.api.DisplayName;
@@ -36,12 +36,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 @ExtendWith(MockitoExtension.class)
 public class BookServiceTests {
-    private static final Long BOOK_ID = 1L;
-    private static final String BOOK_TITLE = "BookOne";
-    private static final String BOOK_AUTHOR = "AuthorOne";
-    private static final String BOOK_ISBN = "978-3-16-148410-0";
-    private static final BigDecimal BOOK_PRICE = BigDecimal.valueOf(39.99);
-
     @InjectMocks
     private BookServiceImpl bookService;
     
@@ -63,7 +57,7 @@ public class BookServiceTests {
         //Given
         Pageable pageable = PageRequest.of(0, 10);
         Book book = createBookSample(BOOK_ID);
-        BookDto expectedBookDto = createBookDtoSample(book);
+        BookDto expectedBookDto = createCustomBookDtoSample(book);
 
         List<Book> books = List.of(book);
         Page<Book> bookPage = new PageImpl<>(books, pageable, books.size());
@@ -77,8 +71,8 @@ public class BookServiceTests {
         //Then
         assertThat(actualBookDtosPage).hasSize(1);
         assertThat(actualBookDtosPage.getContent().getFirst()).isEqualTo(expectedBookDto);
-        verify(bookRepository, times(1)).findAll(pageable);
-        verify(bookMapper, times(1)).toDto(book);
+        verify(bookRepository).findAll(pageable);
+        verify(bookMapper).toDto(book);
         verifyNoMoreInteractions(bookRepository, bookMapper);
     }
 
@@ -90,7 +84,7 @@ public class BookServiceTests {
     void getById_WithValidBookId_ShouldReturnValidBookDto() {
         //Given
         Book book = createBookSample(BOOK_ID);
-        BookDto expectedBookDto = createBookDtoSample(book);
+        BookDto expectedBookDto = createCustomBookDtoSample(book);
 
         when(bookRepository.findById(BOOK_ID)).thenReturn(Optional.of(book));
         when(bookMapper.toDto(book)).thenReturn(expectedBookDto);
@@ -100,7 +94,7 @@ public class BookServiceTests {
 
         //Then
         assertThat(actualBookDto).isEqualTo(expectedBookDto);
-        verify(bookRepository, times(1)).findById(BOOK_ID);
+        verify(bookRepository).findById(BOOK_ID);
         verifyNoMoreInteractions(bookRepository, bookMapper);
     }
 
@@ -123,7 +117,7 @@ public class BookServiceTests {
         String actual = exception.getMessage();
 
         assertEquals(expected, actual);
-        verify(bookRepository, times(1)).findById(BOOK_ID);
+        verify(bookRepository).findById(BOOK_ID);
         verifyNoMoreInteractions(bookRepository);
     }
 
@@ -143,7 +137,7 @@ public class BookServiceTests {
         Book bookSampleWithTitleJava = createBookSample(BOOK_ID);
         bookSampleWithTitleJava.setTitle("Java");
 
-        BookDto expectedBookDto = createBookDtoSample(bookSampleWithTitleJava);
+        BookDto expectedBookDto = createCustomBookDtoSample(bookSampleWithTitleJava);
 
         List<Book> books = List.of(bookSampleWithTitleJava);
         Page<Book> bookPage = new PageImpl<>(books, pageable, 1);
@@ -157,8 +151,8 @@ public class BookServiceTests {
         //Then
         assertThat(actualBookDtosPage).hasSize(1);
         assertThat(actualBookDtosPage.getContent().getFirst()).isEqualTo(expectedBookDto);
-        verify(bookRepository, times(1)).findAll(bookSpecification, pageable);
-        verify(bookMapper, times(1)).toDto(bookSampleWithTitleJava);
+        verify(bookRepository).findAll(bookSpecification, pageable);
+        verify(bookMapper).toDto(bookSampleWithTitleJava);
         verifyNoMoreInteractions(bookRepository, bookMapper);
     }
 
@@ -171,7 +165,7 @@ public class BookServiceTests {
         //Given
         CreateBookRequestDto requestDto = createBookRequestDtoSample();
         Book book = createBookSample(BOOK_ID);
-        BookDto expectedBookDto = createBookDtoSample(book);
+        BookDto expectedBookDto = createCustomBookDtoSample(book);
 
         when(bookMapper.toEntity(requestDto)).thenReturn(book);
         when(bookRepository.save(book)).thenReturn(book);
@@ -182,7 +176,7 @@ public class BookServiceTests {
 
         //Then
         assertThat(actualBookDto).isEqualTo(expectedBookDto);
-        verify(bookRepository, times(1)).save(book);
+        verify(bookRepository).save(book);
         verifyNoMoreInteractions(bookRepository, bookMapper);
     }
 
@@ -203,7 +197,7 @@ public class BookServiceTests {
         updatedBook.setTitle(requestDto.getTitle());
         updatedBook.setAuthor(requestDto.getAuthor());
 
-        BookDto expectedBookDto = createBookDtoSample(updatedBook);
+        BookDto expectedBookDto = createCustomBookDtoSample(updatedBook);
 
         when(bookRepository.findById(BOOK_ID)).thenReturn(Optional.of(existingBook));
         when(bookMapper.toDto(bookRepository.save(updatedBook))).thenReturn(expectedBookDto);
@@ -213,9 +207,9 @@ public class BookServiceTests {
 
         // Then
         assertThat(actualBookDto).isEqualTo(expectedBookDto);
-        verify(bookRepository, times(1)).findById(BOOK_ID);
-        verify(bookRepository, times(1)).save(updatedBook);
-        verify(bookMapper, times(1)).toDto(bookRepository.save(updatedBook));
+        verify(bookRepository).findById(BOOK_ID);
+        verify(bookRepository).save(updatedBook);
+        verify(bookMapper).toDto(bookRepository.save(updatedBook));
     }
 
     @Test
@@ -241,7 +235,7 @@ public class BookServiceTests {
         String actual = exception.getMessage();
 
         assertEquals(expected, actual);
-        verify(bookRepository, times(1)).findById(BOOK_ID);
+        verify(bookRepository).findById(BOOK_ID);
         verifyNoMoreInteractions(bookRepository);
     }
 
@@ -258,50 +252,7 @@ public class BookServiceTests {
         bookService.deleteById(bookId);
 
         //Then
-        verify(bookRepository, times(1)).deleteById(bookId);
+        verify(bookRepository).deleteById(bookId);
         verifyNoMoreInteractions(bookRepository);
-    }
-
-    private CreateBookRequestDto createBookRequestDtoSample() {
-        CreateBookRequestDto requestDto = new CreateBookRequestDto();
-        requestDto.setTitle(BOOK_TITLE);
-        requestDto.setAuthor(BOOK_AUTHOR);
-        requestDto.setIsbn(BOOK_ISBN);
-        requestDto.setPrice(BOOK_PRICE);
-        requestDto.setCategories(List.of(1L));
-        return requestDto;
-    }
-
-    private Book createBookSample(Long id) {
-        Book book = new Book();
-        book.setId(id);
-        book.setTitle(BOOK_TITLE);
-        book.setAuthor(BOOK_AUTHOR);
-        book.setIsbn(BOOK_ISBN);
-        book.setPrice(BOOK_PRICE);
-
-        Category category = new Category();
-        category.setId(id);
-        category.setName("Category1");
-
-        book.setCategories(Set.of(category));
-        return book;
-    }
-
-    private BookDto createBookDtoSample(Book book) {
-        BookDto bookDto = new BookDto();
-        bookDto.setId(book.getId());
-        bookDto.setTitle(book.getTitle());
-        bookDto.setAuthor(book.getAuthor());
-        bookDto.setIsbn(book.getIsbn());
-        bookDto.setPrice(book.getPrice());
-
-        Set<Category> categories = book.getCategories();
-        List<Long> categoriesIds = categories.stream()
-                .map(Category::getId)
-                .toList();
-
-        bookDto.setCategoryIds(categoriesIds);
-        return bookDto;
     }
 }
