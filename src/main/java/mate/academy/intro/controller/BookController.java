@@ -72,6 +72,7 @@ public class BookController {
         return bookService.search(searchParameters, pageable);
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     @Operation(

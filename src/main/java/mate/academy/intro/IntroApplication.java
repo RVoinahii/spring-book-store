@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
-import mate.academy.intro.service.book.BookService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -30,8 +29,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         bearerFormat = "JWT"
 )
 public class IntroApplication {
-    private final BookService bookService;
-
     public static void main(String[] args) {
         SpringApplication.run(IntroApplication.class, args);
     }

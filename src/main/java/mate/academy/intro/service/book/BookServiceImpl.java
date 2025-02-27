@@ -24,12 +24,6 @@ public class BookServiceImpl implements BookService {
     private final BookSpecificationBuilder bookSpecificationBuilder;
 
     @Override
-    public BookDto create(CreateBookRequestDto bookDto) {
-        Book book = bookMapper.toEntity(bookDto);
-        return bookMapper.toDto(bookRepository.save(book));
-    }
-
-    @Override
     public Page<BookDto> getAll(Pageable pageable) {
         return bookRepository.findAll(pageable)
                 .map(bookMapper::toDto);
@@ -48,6 +42,12 @@ public class BookServiceImpl implements BookService {
         Specification<Book> bookSpecification = bookSpecificationBuilder.build(searchParameters);
         return bookRepository.findAll(bookSpecification, pageable)
                 .map(bookMapper::toDto);
+    }
+
+    @Override
+    public BookDto create(CreateBookRequestDto bookDto) {
+        Book book = bookMapper.toEntity(bookDto);
+        return bookMapper.toDto(bookRepository.save(book));
     }
 
     @Override
