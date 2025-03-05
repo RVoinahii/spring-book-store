@@ -1,5 +1,6 @@
 package mate.academy.intro.repository.book;
 
+import static mate.academy.intro.util.TestBookDataUtil.BOOK_ISBN;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -21,6 +22,9 @@ import org.springframework.data.jpa.domain.Specification;
 
 @ExtendWith(MockitoExtension.class)
 public class BookSpecificationBuilderTests {
+    public static final String SOME_TITLE = "Some title";
+    public static final String SOME_AUTHOR = "Some author";
+
     @Mock
     private SpecificationProviderManager<Book> bookSpecificationProviderManager;
 
@@ -51,7 +55,7 @@ public class BookSpecificationBuilderTests {
             """)
     void build_ValidTitle_ShouldBuildSpecificationForTitle() {
         //Given
-        String title = "Some title";
+        String title = SOME_TITLE;
         BookSearchParameters searchParameters = new BookSearchParameters(
                 title, null, null, null, null);
         Specification<Book> mockTitleSpec = mock(Specification.class);
@@ -77,7 +81,7 @@ public class BookSpecificationBuilderTests {
             """)
     void build_ValidAuthor_ShouldBuildSpecificationForAuthor() {
         //Given
-        String author = "Some Author";
+        String author = SOME_AUTHOR;
         BookSearchParameters searchParameters = new BookSearchParameters(
                 null, author, null, null, null);
         Specification<Book> mockAuthorSpec = mock(Specification.class);
@@ -103,7 +107,7 @@ public class BookSpecificationBuilderTests {
             """)
     void build_ValidIsbn_shouldBuildSpecificationForIsbn() {
         //Given
-        String isbn = "978-3-16-148410-0";
+        String isbn = BOOK_ISBN;
         BookSearchParameters searchParameters = new BookSearchParameters(
                 null, null, isbn, null, null);
         Specification<Book> mockIsbnSpec = mock(Specification.class);

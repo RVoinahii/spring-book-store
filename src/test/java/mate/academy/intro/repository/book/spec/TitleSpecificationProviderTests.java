@@ -1,6 +1,7 @@
 package mate.academy.intro.repository.book.spec;
 
 import static mate.academy.intro.repository.book.BookSpecificationBuilder.TITLE;
+import static mate.academy.intro.repository.book.BookSpecificationBuilderTests.SOME_TITLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -65,7 +66,7 @@ public class TitleSpecificationProviderTests {
             """)
     void getSpecification_returnsCorrectPredicate() {
         //Given
-        String title = "Some Title";
+        String title = SOME_TITLE;
 
         when(root.<String>get(TITLE)).thenReturn(authorPath);
         when(criteriaBuilder.lower(authorPath)).thenReturn(authorPath);

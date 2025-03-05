@@ -1,9 +1,10 @@
 package mate.academy.intro.service.book;
 
-import static mate.academy.intro.util.TestDataUtil.BOOK_ID;
-import static mate.academy.intro.util.TestDataUtil.createBookRequestDtoSample;
-import static mate.academy.intro.util.TestDataUtil.createBookSample;
-import static mate.academy.intro.util.TestDataUtil.createCustomBookDtoSample;
+import static mate.academy.intro.util.TestBookDataUtil.PAGE_NUMBER;
+import static mate.academy.intro.util.TestBookDataUtil.PAGE_SIZE;
+import static mate.academy.intro.util.TestBookDataUtil.createBookDtoSampleFromEntity;
+import static mate.academy.intro.util.TestBookDataUtil.createBookRequestDtoSample;
+import static mate.academy.intro.util.TestBookDataUtil.createDefaultBookSample;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -55,9 +56,9 @@ public class BookServiceTests {
             """)
     void getAll_ValidPageable_ReturnsAllBooks() {
         //Given
-        Pageable pageable = PageRequest.of(0, 10);
-        Book book = createBookSample(BOOK_ID);
-        BookDto expectedBookDto = createCustomBookDtoSample(book);
+        Pageable pageable = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
+        Book book = createDefaultBookSample();
+        BookDto expectedBookDto = createBookDtoSampleFromEntity(book);
 
         List<Book> books = List.of(book);
         Page<Book> bookPage = new PageImpl<>(books, pageable, books.size());
@@ -83,18 +84,20 @@ public class BookServiceTests {
             """)
     void getById_WithValidBookId_ShouldReturnValidBookDto() {
         //Given
-        Book book = createBookSample(BOOK_ID);
-        BookDto expectedBookDto = createCustomBookDtoSample(book);
+        Long bookId = 1L;
 
-        when(bookRepository.findById(BOOK_ID)).thenReturn(Optional.of(book));
+        Book book = createDefaultBookSample();
+        BookDto expectedBookDto = createBookDtoSampleFromEntity(book);
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
         when(bookMapper.toDto(book)).thenReturn(expectedBookDto);
 
         //When
-        BookDto actualBookDto = bookService.getById(BOOK_ID);
+        BookDto actualBookDto = bookService.getById(bookId);
 
         //Then
         assertThat(actualBookDto).isEqualTo(expectedBookDto);
-        verify(bookRepository).findById(BOOK_ID);
+        verify(bookRepository).findById(bookId);
         verifyNoMoreInteractions(bookRepository, bookMapper);
     }
 
@@ -105,19 +108,21 @@ public class BookServiceTests {
             """)
     void getById_WithInvalidBookId_ShouldThrowException() {
         //Given
-        when(bookRepository.findById(BOOK_ID)).thenReturn(Optional.empty());
+        Long bookId = 1L;
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
 
         //When
         Exception exception = assertThrows(
-                EntityNotFoundException.class, () -> bookService.getById(BOOK_ID)
+                EntityNotFoundException.class, () -> bookService.getById(bookId)
         );
 
         //Then
-        String expected = "Can't find book by id: " + BOOK_ID;
+        String expected = "Can't find book by id: " + bookId;
         String actual = exception.getMessage();
 
         assertEquals(expected, actual);
-        verify(bookRepository).findById(BOOK_ID);
+        verify(bookRepository).findById(bookId);
         verifyNoMoreInteractions(bookRepository);
     }
 
@@ -132,12 +137,12 @@ public class BookServiceTests {
                 "Java", null, null, null, null
         );
         Specification<Book> bookSpecification = bookSpecificationBuilder.build(searchParameters);
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
 
-        Book bookSampleWithTitleJava = createBookSample(BOOK_ID);
+        Book bookSampleWithTitleJava = createDefaultBookSample();
         bookSampleWithTitleJava.setTitle("Java");
 
-        BookDto expectedBookDto = createCustomBookDtoSample(bookSampleWithTitleJava);
+        BookDto expectedBookDto = createBookDtoSampleFromEntity(bookSampleWithTitleJava);
 
         List<Book> books = List.of(bookSampleWithTitleJava);
         Page<Book> bookPage = new PageImpl<>(books, pageable, 1);
@@ -164,8 +169,8 @@ public class BookServiceTests {
     void create_ValidCreateBookRequestDto_ReturnsBookDto() {
         //Given
         CreateBookRequestDto requestDto = createBookRequestDtoSample();
-        Book book = createBookSample(BOOK_ID);
-        BookDto expectedBookDto = createCustomBookDtoSample(book);
+        Book book = createDefaultBookSample();
+        BookDto expectedBookDto = createBookDtoSampleFromEntity(book);
 
         when(bookMapper.toEntity(requestDto)).thenReturn(book);
         when(bookRepository.save(book)).thenReturn(book);
@@ -191,23 +196,25 @@ public class BookServiceTests {
         requestDto.setTitle("New Title");
         requestDto.setAuthor("New Author");
 
-        Book existingBook = createBookSample(BOOK_ID);
+        Book existingBook = createDefaultBookSample();
 
-        Book updatedBook = createBookSample(BOOK_ID);
+        Book updatedBook = createDefaultBookSample();
         updatedBook.setTitle(requestDto.getTitle());
         updatedBook.setAuthor(requestDto.getAuthor());
 
-        BookDto expectedBookDto = createCustomBookDtoSample(updatedBook);
+        BookDto expectedBookDto = createBookDtoSampleFromEntity(updatedBook);
 
-        when(bookRepository.findById(BOOK_ID)).thenReturn(Optional.of(existingBook));
+        Long bookId = 1L;
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(existingBook));
         when(bookMapper.toDto(bookRepository.save(updatedBook))).thenReturn(expectedBookDto);
 
         // When
-        BookDto actualBookDto = bookService.updateById(BOOK_ID, requestDto);
+        BookDto actualBookDto = bookService.updateById(bookId, requestDto);
 
         // Then
         assertThat(actualBookDto).isEqualTo(expectedBookDto);
-        verify(bookRepository).findById(BOOK_ID);
+        verify(bookRepository).findById(bookId);
         verify(bookRepository).save(updatedBook);
         verify(bookMapper).toDto(bookRepository.save(updatedBook));
     }
@@ -219,23 +226,25 @@ public class BookServiceTests {
             """)
     void updateById_WithInvalidBookId_ShouldThrowException() {
         //Given
+        Long bookId = 1L;
+
         CreateBookRequestDto requestDto = createBookRequestDtoSample();
         requestDto.setTitle("New Title");
         requestDto.setAuthor("New Author");
 
-        when(bookRepository.findById(BOOK_ID)).thenReturn(Optional.empty());
+        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
 
         //When
         Exception exception = assertThrows(
-                EntityNotFoundException.class, () -> bookService.updateById(BOOK_ID, requestDto)
+                EntityNotFoundException.class, () -> bookService.updateById(bookId, requestDto)
         );
 
         //Then
-        String expected = "Can't find book by id: " + BOOK_ID;
+        String expected = "Can't find book by id: " + bookId;
         String actual = exception.getMessage();
 
         assertEquals(expected, actual);
-        verify(bookRepository).findById(BOOK_ID);
+        verify(bookRepository).findById(bookId);
         verifyNoMoreInteractions(bookRepository);
     }
 
@@ -246,7 +255,7 @@ public class BookServiceTests {
             """)
     void deleteById_WithValidId_ShouldInvokeRepositoryOnce() {
         //Given
-        Long bookId = BOOK_ID;
+        Long bookId = 1L;
 
         //When
         bookService.deleteById(bookId);

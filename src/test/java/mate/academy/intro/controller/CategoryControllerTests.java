@@ -1,11 +1,12 @@
 package mate.academy.intro.controller;
 
-import static mate.academy.intro.util.TestDataUtil.PAGE_SIZE;
-import static mate.academy.intro.util.TestDataUtil.createCategoryRequestDtoSample;
-import static mate.academy.intro.util.TestDataUtil.createDefaultBookWithoutCategoriesDtoSample;
-import static mate.academy.intro.util.TestDataUtil.createDefaultCategoryDtoSample;
+import static mate.academy.intro.util.TestBookDataUtil.PAGE_SIZE;
+import static mate.academy.intro.util.TestBookDataUtil.createDefaultBookWithoutCategoriesDtoSample;
+import static mate.academy.intro.util.TestCategoryDataUtil.createCategoryRequestDtoSample;
+import static mate.academy.intro.util.TestCategoryDataUtil.createDefaultCategoryDtoSample;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -54,6 +55,72 @@ public class CategoryControllerTests {
                 .build();
     }
 
+    @Test
+    @DisplayName("""
+        get/post/put/deleteMethods():
+         Should return 401 UNAUTHORIZED when user is not authenticated
+            """)
+    void getPostPutDeleteMethods_UnauthorizedUser_ShouldReturnUnauthorized() throws Exception {
+        //Given
+        Long categoryId = 1L;
+
+        // When & Then
+        mockMvc.perform(get("/categories"))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(get("/categories/{categoryId}", categoryId))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(get("/categories/{categoryId}/books", categoryId))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(post("/categories"))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(put("/categories/{categoryId}", categoryId))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(delete("/categories/{categoryId}", categoryId))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @WithMockUser(username = "user", authorities = "USER")
+    @Test
+    @DisplayName("""
+         post/put/deleteMethods():
+         Should return 500 ACCESS DENIED when user doesn't have authority 'ADMIN'
+            """)
+    void postPutDeleteMethods_UserWithoutRequiredAuthority_ShouldReturnAccessDenied()
+            throws Exception {
+        //Given
+        Long categoryId = 1L;
+
+        CreateCategoryRequestDto requestDto = createCategoryRequestDtoSample();
+
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        //When & Then
+        MvcResult postResult = mockMvc.perform(
+                        post("/categories")
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isInternalServerError())
+                .andReturn();
+
+        MvcResult putResult = mockMvc.perform(
+                        put("/categories/{categoryId}", categoryId)
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isInternalServerError())
+                .andReturn();
+
+        MvcResult deleteResult = mockMvc.perform(delete("/categories/{categoryId}", categoryId))
+                .andExpect(status().isInternalServerError())
+                .andReturn();
+    }
+
     @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
     @Test
     @DisplayName("""
@@ -66,8 +133,10 @@ public class CategoryControllerTests {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void getAllCategories_ValidPageable_Success() throws Exception {
         //Given
+        Long expectedCategoryId = 1L;
+
         CategoryDto expectedCategoryDto = createDefaultCategoryDtoSample();
-        expectedCategoryDto.setId(1L);
+        expectedCategoryDto.setId(expectedCategoryId);
 
         //When
         MvcResult result = mockMvc.perform(get("/categories"))
@@ -81,8 +150,9 @@ public class CategoryControllerTests {
         assertNotNull(actualPage);
         assertEquals(1, actualPage.getTotalElements());
         assertEquals(PAGE_SIZE, actualPage.getSize());
-        EqualsBuilder.reflectionEquals(
-                actualPage.getContent().getFirst(), expectedCategoryDto, "description");
+        assertTrue(EqualsBuilder.reflectionEquals(
+                actualPage.getContent().getFirst(), expectedCategoryDto));
+
     }
 
     @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
@@ -97,17 +167,35 @@ public class CategoryControllerTests {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void getCategoryById_ValidId_Success() throws Exception {
         //Given
+        Long expectedCategoryId = 1L;
+
         CategoryDto expected = createDefaultCategoryDtoSample();
-        expected.setId(1L);
+        expected.setId(expectedCategoryId);
         //When
-        MvcResult result = mockMvc.perform(get("/categories/1"))
+        MvcResult result = mockMvc.perform(get("/categories/{categoryId}", expectedCategoryId))
                 .andExpect(status().isOk())
                 .andReturn();
         //Then
         CategoryDto actual = objectMapper.readValue(result.getResponse()
                 .getContentAsString(), CategoryDto.class);
+
         assertNotNull(actual);
-        EqualsBuilder.reflectionEquals(expected, actual, "description");
+        assertTrue(EqualsBuilder.reflectionEquals(expected, actual));
+    }
+
+    @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
+    @Test
+    @DisplayName("""
+        getCategoryById():
+         Should return 404 NOT FOUND when given invalid ID
+            """)
+    void getCategoryById_InvalidId_NotFound() throws Exception {
+        //Given
+        Long invalidId = 99L;
+
+        // When & Then
+        mockMvc.perform(get("/categories/{id}", invalidId))
+                .andExpect(status().isNotFound());
     }
 
     @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
@@ -127,12 +215,14 @@ public class CategoryControllerTests {
     void getBooksByCategoryId_WithValidParametersAndCategoryId_Success() throws Exception {
         //Given
         Long expectedBookId = 1L;
+        Long expectedCategoryId = 1L;
 
         BookWithoutCategoriesDto expectedBookDto = createDefaultBookWithoutCategoriesDtoSample();
         expectedBookDto.setId(expectedBookId);
 
         //When
-        MvcResult result = mockMvc.perform(get("/categories/1/books"))
+        MvcResult result = mockMvc.perform(get("/categories/{categoryId}/books",
+                        expectedCategoryId))
                 .andExpect(status().isOk())
                 .andReturn();
         //Then
@@ -143,7 +233,23 @@ public class CategoryControllerTests {
         assertNotNull(actualPage);
         assertEquals(1, actualPage.getTotalElements());
         assertEquals(PAGE_SIZE, actualPage.getSize());
-        EqualsBuilder.reflectionEquals(actualPage.getContent().getFirst(), expectedBookDto);
+        assertTrue(EqualsBuilder.reflectionEquals(
+                actualPage.getContent().getFirst(), expectedBookDto));
+    }
+
+    @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
+    @Test
+    @DisplayName("""
+        getBooksByCategoryId():
+         Should return 404 NOT FOUND when given invalid ID
+            """)
+    void getBooksByCategoryId_InvalidBookId_NotFound() throws Exception {
+        //Given
+        Long invalidId = 99L;
+
+        // When & Then
+        mockMvc.perform(get("/categories/{categoryId}/books", invalidId))
+                .andExpect(status().isNotFound());
     }
 
     @WithMockUser(username = "admin", authorities = "ADMIN")
@@ -175,7 +281,28 @@ public class CategoryControllerTests {
                 .getContentAsString(), CategoryDto.class);
         assertNotNull(actual);
         assertNotNull(actual.getId());
-        EqualsBuilder.reflectionEquals(expected, actual, "description");
+        assertTrue(EqualsBuilder.reflectionEquals(expected, actual, "id"));
+    }
+
+    @WithMockUser(username = "admin", authorities = "ADMIN")
+    @Test
+    @DisplayName("""
+            createCategory():
+             Should return 400 BAD REQUEST when given invalid request body
+            """)
+    void createCategory_InvalidRequestDto_BadRequest() throws Exception {
+        //Given
+        CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto(null, null);
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        //When & Then
+        MvcResult result = mockMvc.perform(
+                        post("/categories")
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isBadRequest())
+                .andReturn();
     }
 
     @WithMockUser(username = "admin", authorities = "ADMIN")
@@ -190,11 +317,13 @@ public class CategoryControllerTests {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateCategoryById_ValidRequestDtoAndId_Success() throws Exception {
         //Given
+        Long expectedCategoryId = 1L;
+
         CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto(
                 "New Name", "New Description");
 
         CategoryDto expected = createDefaultCategoryDtoSample();
-        expected.setId(1L);
+        expected.setId(expectedCategoryId);
         expected.setName(requestDto.name());
         expected.setDescription(requestDto.description());
 
@@ -202,7 +331,7 @@ public class CategoryControllerTests {
 
         //When
         MvcResult result = mockMvc.perform(
-                        put("/categories/1")
+                        put("/categories/{categoryId}", expectedCategoryId)
                                 .content(jsonRequest)
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -214,7 +343,54 @@ public class CategoryControllerTests {
                 .getContentAsString(), CategoryDto.class);
         assertNotNull(actual);
         assertNotNull(actual.getId());
-        EqualsBuilder.reflectionEquals(expected, actual);
+        assertTrue(EqualsBuilder.reflectionEquals(expected, actual));
+    }
+
+    @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
+    @Test
+    @DisplayName("""
+        updateCategoryById():
+         Should return 404 NOT FOUND when given invalid ID
+            """)
+    void updateCategoryByById_InvalidId_NotFound() throws Exception {
+        //Given
+        Long invalidId = 99L;
+
+        CreateCategoryRequestDto requestDto = createCategoryRequestDtoSample();
+
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        // When & Then
+        MvcResult result = mockMvc.perform(
+                        put("/categories/{categoryId}", invalidId)
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+
+    @WithMockUser(username = "admin", authorities = "ADMIN")
+    @Test
+    @DisplayName("""
+            updateCategoryById():
+             Should return 400 BAD REQUEST when given invalid request body
+            """)
+    void updateCategoryById_InvalidRequestDto_BadRequest() throws Exception {
+        //Given
+        Long categoryId = 1L;
+
+        CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto(null, null);
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        //When & Then
+        MvcResult result = mockMvc.perform(
+                        put("/categories/{categoryId}", categoryId)
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isBadRequest())
+                .andReturn();
     }
 
     @WithMockUser(username = "admin", authorities = "ADMIN")
@@ -228,11 +404,16 @@ public class CategoryControllerTests {
     @Sql(scripts = "classpath:database/clear_database.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void deleteCategory_ValidId_Success() throws Exception {
+        //Given
+        Long categoryId = 1L;
+
         //When
-        MvcResult result = mockMvc.perform(delete("/categories/1"))
+        MvcResult result = mockMvc.perform(delete("/categories/{categoryId}", categoryId))
                 .andExpect(status().isNoContent())
                 .andReturn();
         //Then
-        mockMvc.perform(get("/categories/1")).andExpect(status().isNotFound());
+        mockMvc.perform(get(
+                "/categories/{categoryId}", categoryId)).andExpect(status().isNotFound()
+        );
     }
 }

@@ -1,12 +1,12 @@
 package mate.academy.intro.service.category;
 
-import static mate.academy.intro.util.TestDataUtil.BOOK_ID;
-import static mate.academy.intro.util.TestDataUtil.CATEGORY_ID;
-import static mate.academy.intro.util.TestDataUtil.createBookWithCustomCategorySample;
-import static mate.academy.intro.util.TestDataUtil.createCategoryRequestDtoSample;
-import static mate.academy.intro.util.TestDataUtil.createCategorySample;
-import static mate.academy.intro.util.TestDataUtil.createCustomBookWithoutCategoriesDtoSample;
-import static mate.academy.intro.util.TestDataUtil.createCustomCategoryDtoSample;
+import static mate.academy.intro.util.TestBookDataUtil.PAGE_NUMBER;
+import static mate.academy.intro.util.TestBookDataUtil.PAGE_SIZE;
+import static mate.academy.intro.util.TestBookDataUtil.createBookWithCustomCategorySample;
+import static mate.academy.intro.util.TestBookDataUtil.createBookWithoutCategoriesDtoSampleFromEntity;
+import static mate.academy.intro.util.TestCategoryDataUtil.createCategoryDtoSampleFromEntity;
+import static mate.academy.intro.util.TestCategoryDataUtil.createCategoryRequestDtoSample;
+import static mate.academy.intro.util.TestCategoryDataUtil.createDefaultCategorySample;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -61,9 +61,9 @@ public class CategoryServiceTests {
             """)
     void getAll_ValidPageable_ReturnsAllBooks() {
         //Given
-        Pageable pageable = PageRequest.of(0, 10);
-        Category category = createCategorySample(CATEGORY_ID);
-        CategoryDto expectedCategoryDto = createCustomCategoryDtoSample(category);
+        Pageable pageable = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
+        Category category = createDefaultCategorySample();
+        CategoryDto expectedCategoryDto = createCategoryDtoSampleFromEntity(category);
 
         List<Category> categories = List.of(category);
         Page<Category> categoryPage = new PageImpl<>(categories, pageable, categories.size());
@@ -89,18 +89,20 @@ public class CategoryServiceTests {
             """)
     void getById_WithValidBookId_ShouldReturnValidBookDto() {
         //Given
-        Category category = createCategorySample(CATEGORY_ID);
-        CategoryDto expectedCategoryDto = createCustomCategoryDtoSample(category);
+        Long categoryId = 1L;
 
-        when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(category));
+        Category category = createDefaultCategorySample();
+        CategoryDto expectedCategoryDto = createCategoryDtoSampleFromEntity(category);
+
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
         when(categoryMapper.toDto(category)).thenReturn(expectedCategoryDto);
 
         //When
-        CategoryDto actualCategoryDtoById = categoryService.getById(CATEGORY_ID);
+        CategoryDto actualCategoryDtoById = categoryService.getById(categoryId);
 
         //Then
         assertThat(actualCategoryDtoById).isEqualTo(expectedCategoryDto);
-        verify(categoryRepository).findById(CATEGORY_ID);
+        verify(categoryRepository).findById(categoryId);
         verifyNoMoreInteractions(categoryRepository, categoryMapper);
     }
 
@@ -111,19 +113,21 @@ public class CategoryServiceTests {
             """)
     void getById_WithInvalidBookId_ShouldThrowException() {
         //Given
-        when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.empty());
+        Long categoryId = 1L;
+
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
         //When
         Exception exception = assertThrows(
-                EntityNotFoundException.class, () -> categoryService.getById(CATEGORY_ID)
+                EntityNotFoundException.class, () -> categoryService.getById(categoryId)
         );
 
         //Then
-        String expected = "Can't find category by id: " + CATEGORY_ID;
+        String expected = "Can't find category by id: " + categoryId;
         String actual = exception.getMessage();
 
         assertEquals(expected, actual);
-        verify(categoryRepository).findById(CATEGORY_ID);
+        verify(categoryRepository).findById(categoryId);
         verifyNoMoreInteractions(categoryRepository);
     }
 
@@ -135,29 +139,60 @@ public class CategoryServiceTests {
             """)
     void getBooksByCategoryId_WithValidCategoryId_ShouldReturnValidBooks() {
         //Given
-        Pageable pageable = PageRequest.of(0, 10);
+        Long categoryId = 1L;
 
-        Category category = createCategorySample(CATEGORY_ID);
+        Pageable pageable = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
 
-        Book book = createBookWithCustomCategorySample(BOOK_ID, category);
-        BookWithoutCategoriesDto expectedBookDto = createCustomBookWithoutCategoriesDtoSample(book);
+        Category category = createDefaultCategorySample();
+
+        Book book = createBookWithCustomCategorySample(category);
+        BookWithoutCategoriesDto expectedBookDto =
+                createBookWithoutCategoriesDtoSampleFromEntity(book);
 
         List<Book> books = List.of(book);
         Page<Book> bookPage = new PageImpl<>(books, pageable, books.size());
 
-        when(bookRepository.findAllByCategoryId(pageable, CATEGORY_ID)).thenReturn(bookPage);
+        when(bookRepository.findAllByCategoryId(pageable, categoryId)).thenReturn(bookPage);
         when(bookMapper.toBookWithoutCategoriesDto(book)).thenReturn(expectedBookDto);
 
         //When
         Page<BookWithoutCategoriesDto> actualBookDtoPage = categoryService.getBooksByCategoryId(
-                pageable, CATEGORY_ID);
+                pageable, categoryId);
 
         //Then
         assertThat(actualBookDtoPage).hasSize(1);
         assertThat(actualBookDtoPage.getContent().getFirst()).isEqualTo(expectedBookDto);
-        verify(bookRepository).findAllByCategoryId(pageable, CATEGORY_ID);
+        verify(bookRepository).findAllByCategoryId(pageable, categoryId);
         verify(bookMapper).toBookWithoutCategoriesDto(book);
         verifyNoMoreInteractions(bookRepository, bookMapper);
+    }
+
+    @Test
+    @DisplayName("""
+            getBooksByCategoryId():
+             Should throw EntityNotFoundException when category with given ID doesn't exist
+            """)
+    void getBooksByCategoryId_InvalidCategoryId_ShouldThrowException() {
+        //Given
+        Long categoryId = 1L;
+
+        Pageable pageable = PageRequest.of(PAGE_NUMBER, PAGE_SIZE);
+
+        when(bookRepository.findAllByCategoryId(pageable, categoryId)).thenReturn(Page.empty());
+
+        //When
+        Exception exception = assertThrows(
+                EntityNotFoundException.class, () -> categoryService
+                        .getBooksByCategoryId(pageable, categoryId)
+        );
+
+        //Then
+        String expected = "Can't find books for category id: " + categoryId;
+        String actual = exception.getMessage();
+
+        assertEquals(expected, actual);
+        verify(bookRepository).findAllByCategoryId(pageable, categoryId);
+        verifyNoMoreInteractions(bookRepository);
     }
 
     @Test
@@ -168,8 +203,8 @@ public class CategoryServiceTests {
     void create_ValidCreateCategoryRequestDto_ReturnsBookDto() {
         //Given
         CreateCategoryRequestDto requestDto = createCategoryRequestDtoSample();
-        Category category = createCategorySample(CATEGORY_ID);
-        CategoryDto expectedCategoryDto = createCustomCategoryDtoSample(category);
+        Category category = createDefaultCategorySample();
+        CategoryDto expectedCategoryDto = createCategoryDtoSampleFromEntity(category);
 
         when(categoryMapper.toEntity(requestDto)).thenReturn(category);
         when(categoryRepository.save(category)).thenReturn(category);
@@ -191,27 +226,29 @@ public class CategoryServiceTests {
             """)
     void updateById_WithValidId_ShouldReturnValidDto() {
         //Given
+        Long categoryId = 1L;
+
         CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto(
                 "New Name", "New Description");
 
-        Category existingCategory = createCategorySample(CATEGORY_ID);
+        Category existingCategory = createDefaultCategorySample();
 
-        Category updatedCategory = createCategorySample(CATEGORY_ID);
+        Category updatedCategory = createDefaultCategorySample();
         updatedCategory.setName(requestDto.name());
         updatedCategory.setDescription(requestDto.description());
 
-        CategoryDto expectedCategoryDto = createCustomCategoryDtoSample(updatedCategory);
+        CategoryDto expectedCategoryDto = createCategoryDtoSampleFromEntity(updatedCategory);
 
-        when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(existingCategory));
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(existingCategory));
         when(categoryMapper.toDto(categoryRepository.save(updatedCategory)))
                 .thenReturn(expectedCategoryDto);
 
         // When
-        CategoryDto actualCategoryDto = categoryService.updateById(CATEGORY_ID, requestDto);
+        CategoryDto actualCategoryDto = categoryService.updateById(categoryId, requestDto);
 
         // Then
         assertThat(actualCategoryDto).isEqualTo(expectedCategoryDto);
-        verify(categoryRepository).findById(CATEGORY_ID);
+        verify(categoryRepository).findById(categoryId);
         verify(categoryRepository).save(updatedCategory);
         verify(categoryMapper).toDto(categoryRepository.save(updatedCategory));
     }
@@ -223,23 +260,25 @@ public class CategoryServiceTests {
             """)
     void updateById_WithInvalidCategoryId_ShouldThrowException() {
         //Given
+        Long categoryId = 1L;
+
         CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto(
                 "New Name", "New Description");
 
-        when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.empty());
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
         //When
         Exception exception = assertThrows(
                 EntityNotFoundException.class, () -> categoryService.updateById(
-                        CATEGORY_ID, requestDto)
+                        categoryId, requestDto)
         );
 
         //Then
-        String expected = "Can't find category by id: " + CATEGORY_ID;
+        String expected = "Can't find category by id: " + categoryId;
         String actual = exception.getMessage();
 
         assertEquals(expected, actual);
-        verify(categoryRepository).findById(CATEGORY_ID);
+        verify(categoryRepository).findById(categoryId);
         verifyNoMoreInteractions(categoryRepository);
     }
 
@@ -250,7 +289,7 @@ public class CategoryServiceTests {
             """)
     void deleteById_WithValidId_ShouldInvokeRepositoryOnce() {
         //Given
-        Long bookId = CATEGORY_ID;
+        Long bookId = 1L;
 
         //When
         categoryService.deleteById(bookId);

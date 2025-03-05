@@ -7,6 +7,7 @@ import mate.academy.intro.dto.category.CreateCategoryRequestDto;
 import mate.academy.intro.exceptions.EntityNotFoundException;
 import mate.academy.intro.mapper.BookMapper;
 import mate.academy.intro.mapper.CategoryMapper;
+import mate.academy.intro.model.Book;
 import mate.academy.intro.model.Category;
 import mate.academy.intro.repository.book.BookRepository;
 import mate.academy.intro.repository.category.CategoryRepository;
@@ -40,8 +41,12 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Page<BookWithoutCategoriesDto> getBooksByCategoryId(Pageable pageable, Long id) {
-        return bookRepository.findAllByCategoryId(pageable, id)
-                .map(bookMapper::toBookWithoutCategoriesDto);
+        Page<Book> books = bookRepository.findAllByCategoryId(pageable, id);
+
+        if (books.isEmpty()) {
+            throw new EntityNotFoundException("Can't find books for category id: " + id);
+        }
+        return books.map(bookMapper::toBookWithoutCategoriesDto);
     }
 
     @Override

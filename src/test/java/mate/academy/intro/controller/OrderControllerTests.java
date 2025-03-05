@@ -1,0 +1,520 @@
+package mate.academy.intro.controller;
+
+import static mate.academy.intro.util.TestBookDataUtil.PAGE_SIZE;
+import static mate.academy.intro.util.TestOrderDataUtil.ORDER_SHIPPING_ADDRESS;
+import static mate.academy.intro.util.TestOrderDataUtil.createDefaultEmptyOrderDtoSample;
+import static mate.academy.intro.util.TestOrderDataUtil.createDefaultOrderItemDtoSample;
+import static mate.academy.intro.util.TestUserDataUtil.USER_EMAIL;
+import static mate.academy.intro.util.TestUserDataUtil.USER_HASHED_PASSWORD;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import mate.academy.intro.dto.order.CreateOrderRequestDto;
+import mate.academy.intro.dto.order.OrderDto;
+import mate.academy.intro.dto.order.UpdateOrderStatusRequestDto;
+import mate.academy.intro.dto.order.item.OrderItemDto;
+import mate.academy.intro.model.PageResponse;
+import mate.academy.intro.model.User;
+import mate.academy.intro.service.order.OrderService;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.shaded.org.apache.commons.lang3.builder.EqualsBuilder;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class OrderControllerTests {
+    protected static MockMvc mockMvc;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
+
+    @BeforeAll
+    static void beforeAll(
+            @Autowired WebApplicationContext applicationContext
+    ) {
+        mockMvc = MockMvcBuilders
+                .webAppContextSetup(applicationContext)
+                .apply(springSecurity())
+                .build();
+    }
+
+    @BeforeEach
+    void setUp() {
+        User user = new User();
+        user.setId(3L);
+        user.setEmail(USER_EMAIL);
+        user.setPassword(USER_HASHED_PASSWORD);
+
+        when(userDetailsService.loadUserByUsername("admin")).thenReturn(user);
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, null,
+                        List.of(new SimpleGrantedAuthority("ADMIN")))
+        );
+    }
+
+    @Test
+    @DisplayName("""
+        get/post/patchMethods():
+         Should return 401 UNAUTHORIZED when user is not authenticated
+            """)
+    void getPostPutDeleteMethods_UnauthorizedUser_ShouldReturnUnauthorized() throws Exception {
+        //Given
+        SecurityContextHolder.clearContext();
+
+        // When & Then
+        Long orderId = 1L;
+        Long orderItemId = 1L;
+
+        mockMvc.perform(get("/orders"))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(get("/orders/{orderId}/items", orderId))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(get("/orders/{orderId}/items/{orderItemId}", orderId, orderItemId))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(post("/orders"))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(patch("/orders/{orderId}", orderId))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("""
+            viewOrderItem():
+             Verifying retrieval of all orders with correct pagination parameters
+            """)
+    @Sql(scripts = {
+            "classpath:database/users/insert_one_user.sql",
+            "classpath:database/books/insert_one_book.sql",
+            "classpath:database/orders/insert_one_order.sql",
+            "classpath:database/order_items/insert_one_order_item.sql",
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "classpath:database/clear_database.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void viewOrderHistory_ValidPageableAndUser_Success() throws Exception {
+        //Given
+        Long expectedUserId = 3L;
+
+        OrderDto expectedOrderDto = createDefaultEmptyOrderDtoSample();
+        expectedOrderDto.setUserId(expectedUserId);
+
+        OrderItemDto expectedOrderItemDto = createDefaultOrderItemDtoSample();
+
+        expectedOrderDto.setOrderItems(new ArrayList<>(List.of(expectedOrderItemDto)));
+
+        Long expectedOrderId = 1L;
+
+        //When
+        MvcResult result = mockMvc.perform(get("/orders"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        //Then
+        PageResponse<OrderDto> actualOrderDtosPage = objectMapper.readValue(result.getResponse()
+                .getContentAsString(), new TypeReference<>() {
+                });
+
+        assertNotNull(actualOrderDtosPage);
+        assertEquals(expectedOrderId, actualOrderDtosPage.getContent().getFirst().getId());
+        assertEquals(expectedUserId, actualOrderDtosPage.getContent().getFirst().getUserId());
+        assertEquals(1, actualOrderDtosPage.getTotalElements());
+        assertEquals(PAGE_SIZE, actualOrderDtosPage.getSize());
+        assertTrue(EqualsBuilder.reflectionEquals(expectedOrderDto,
+                actualOrderDtosPage.getContent().getFirst(), "orderItems", "orderDate"));
+        assertTrue(EqualsBuilder.reflectionEquals(expectedOrderItemDto,
+                actualOrderDtosPage.getContent().getFirst().getOrderItems().getFirst()));
+    }
+
+    @Test
+    @DisplayName("""
+            viewOrderItems():
+             Verifying retrieval full list of order items by order ID
+            """)
+    @Sql(scripts = {
+            "classpath:database/users/insert_one_user.sql",
+            "classpath:database/books/insert_one_book.sql",
+            "classpath:database/orders/insert_one_order.sql",
+            "classpath:database/order_items/insert_one_order_item.sql",
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "classpath:database/clear_database.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void viewOrderItems_ValidOrderId_Success() throws Exception {
+        //Given
+        Long orderId = 1L;
+
+        OrderItemDto expectedOrderItemDto = createDefaultOrderItemDtoSample();
+
+        MvcResult result = mockMvc.perform(get("/orders/{orderId}/items", orderId))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        //Then
+        List<OrderItemDto> actualOrderItemDtosList = objectMapper.readValue(result.getResponse()
+                .getContentAsString(), new TypeReference<>() {
+                });
+
+        assertNotNull(actualOrderItemDtosList);
+        assertEquals(1, actualOrderItemDtosList.size());
+        assertTrue(EqualsBuilder.reflectionEquals(expectedOrderItemDto,
+                actualOrderItemDtosList.getFirst()));
+    }
+
+    @Test
+    @DisplayName("""
+            viewOrderItems():
+             Should return 404 NOT FOUND when given invalid order ID
+            """)
+    void viewOrderItems_InvalidOrderId_NotFound() throws Exception {
+        //Given
+        Long orderId = 99L;
+
+        //When & Then
+        MvcResult result = mockMvc.perform(get("/orders/{orderId}/items", orderId))
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+
+    @Test
+    @DisplayName("""
+            viewOrderItem():
+             Verifying retrieval of an order item by its ID and order ID
+            """)
+    @Sql(scripts = {
+            "classpath:database/users/insert_one_user.sql",
+            "classpath:database/books/insert_one_book.sql",
+            "classpath:database/orders/insert_one_order.sql",
+            "classpath:database/order_items/insert_one_order_item.sql",
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "classpath:database/clear_database.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void viewOrderItem_ValidOrderAndItemIds_Success() throws Exception {
+        //Given
+        Long orderId = 1L;
+        Long orderItemId = 1L;
+
+        OrderItemDto expectedOrderItemDto = createDefaultOrderItemDtoSample();
+
+        MvcResult result = mockMvc.perform(get("/orders/{orderId}/items/{orderItemId}",
+                        orderId, orderItemId))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        //Then
+        OrderItemDto actualOrderItemDto = objectMapper.readValue(result.getResponse()
+                .getContentAsString(), OrderItemDto.class);
+
+        assertNotNull(actualOrderItemDto);
+        assertTrue(EqualsBuilder.reflectionEquals(expectedOrderItemDto, actualOrderItemDto));
+    }
+
+    @Test
+    @DisplayName("""
+            viewOrderItem():
+             Should return 404 NOT FOUND when given invalid order ID
+            """)
+    void viewOrderItem_InvalidOrderId_NotFound() throws Exception {
+        //Given
+        Long orderId = 99L;
+        Long orderItemId = 1L;
+
+        //When & Then
+        MvcResult result = mockMvc.perform(get("/orders/{orderId}/items/{orderItemId}",
+                        orderId, orderItemId))
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+
+    @Test
+    @DisplayName("""
+            viewOrderItem():
+             Should return 404 NOT FOUND when given invalid order item ID
+            """)
+    void viewOrderItem_InvalidOrderItemId_NotFound() throws Exception {
+        //Given
+        Long orderId = 1L;
+        Long invalidOrderItemId = 99L;
+
+        //When & Then
+        MvcResult result = mockMvc.perform(get("/orders/{orderId}/items/{orderItemId}",
+                        orderId, invalidOrderItemId))
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+
+    @Test
+    @DisplayName("""
+            placeOrder():
+             Confirming successful creation of an order with valid request
+            """)
+    @Sql(scripts = {
+            "classpath:database/users/insert_one_user.sql",
+            "classpath:database/shopping_carts/insert_one_shopping_cart.sql",
+            "classpath:database/books/insert_one_book.sql",
+            "classpath:database/cart_items/insert_one_cart_item.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "classpath:database/clear_database.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void placeOrder_ValidRequestDto_Success() throws Exception {
+        //Given
+        Long expectedUserId = 3L;
+        BigDecimal expectedTotal = new BigDecimal("39.99");
+
+        CreateOrderRequestDto requestDto = new CreateOrderRequestDto(ORDER_SHIPPING_ADDRESS);
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        OrderDto expectedOrderDto = createDefaultEmptyOrderDtoSample();
+        expectedOrderDto.setUserId(expectedUserId);
+        expectedOrderDto.setTotal(expectedTotal);
+
+        OrderItemDto expectedOrderItemDto = createDefaultOrderItemDtoSample();
+
+        expectedOrderDto.setOrderItems(new ArrayList<>(List.of(expectedOrderItemDto)));
+
+        Long expectedOrderId = 1L;
+
+        //When
+        MvcResult result = mockMvc.perform(
+                post("/orders")
+                        .content(jsonRequest)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+        //Then
+        OrderDto actualOrderDto = objectMapper.readValue(result.getResponse()
+                .getContentAsString(), OrderDto.class);
+
+        assertNotNull(actualOrderDto);
+        assertEquals(expectedOrderId, actualOrderDto.getId());
+        assertEquals(expectedUserId, actualOrderDto.getUserId());
+        assertEquals(1, actualOrderDto.getOrderItems().size());
+        assertTrue(EqualsBuilder.reflectionEquals(expectedOrderDto,
+                actualOrderDto, "orderItems", "orderDate"));
+        assertTrue(EqualsBuilder.reflectionEquals(expectedOrderItemDto,
+                actualOrderDto.getOrderItems().getFirst()));
+    }
+
+    @Test
+    @DisplayName("""
+            placeOrder():
+             Should return 400 BAD REQUEST when user have empty shopping cart
+            """)
+    @Sql(scripts = {
+            "classpath:database/users/insert_one_user.sql",
+            "classpath:database/shopping_carts/insert_one_shopping_cart.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "classpath:database/clear_database.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void placeOrder_EmptyShoppingCart_BadRequest() throws Exception {
+        //Given
+        CreateOrderRequestDto requestDto = new CreateOrderRequestDto(ORDER_SHIPPING_ADDRESS);
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        //When & Then
+        MvcResult result = mockMvc.perform(
+                        post("/orders")
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    @DisplayName("""
+            placeOrder():
+             Should return 400 BAD REQUEST when given invalid request body
+            """)
+    @Sql(scripts = {
+            "classpath:database/users/insert_one_user.sql",
+            "classpath:database/shopping_carts/insert_one_shopping_cart.sql",
+            "classpath:database/books/insert_one_book.sql",
+            "classpath:database/cart_items/insert_one_cart_item.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "classpath:database/clear_database.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void placeOrder_InvalidRequestDto_BadRequest() throws Exception {
+        //Given
+        CreateOrderRequestDto requestDto = new CreateOrderRequestDto(null);
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        //When & Then
+        MvcResult result = mockMvc.perform(
+                        post("/orders")
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    @DisplayName("""
+            updateOrderStatus():
+             Verifying updating order status by ID with valid request
+            """)
+    @Sql(scripts = {
+            "classpath:database/users/insert_one_user.sql",
+            "classpath:database/books/insert_one_book.sql",
+            "classpath:database/orders/insert_one_order.sql",
+            "classpath:database/order_items/insert_one_order_item.sql",
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "classpath:database/clear_database.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void updateOrderStatus_ValidRequestDtoAndOrderId_Success() throws Exception {
+        //Given
+        Long expectedOrderId = 1L;
+        Long expectedUserId = 3L;
+        String updatedOrderStatus = "DELIVERED";
+
+        UpdateOrderStatusRequestDto requestDto = new UpdateOrderStatusRequestDto(
+                updatedOrderStatus);
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        OrderDto expectedOrderDto = createDefaultEmptyOrderDtoSample();
+        expectedOrderDto.setUserId(expectedUserId);
+        expectedOrderDto.setStatus(updatedOrderStatus);
+
+        OrderItemDto expectedOrderItemDto = createDefaultOrderItemDtoSample();
+
+        expectedOrderDto.setOrderItems(new ArrayList<>(List.of(expectedOrderItemDto)));
+
+        MvcResult result = mockMvc.perform(
+                        patch("/orders/{orderId}", expectedOrderId)
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        //Then
+        OrderDto actualOrderDto = objectMapper.readValue(result.getResponse()
+                .getContentAsString(), OrderDto.class);
+
+        assertNotNull(actualOrderDto);
+        assertEquals(expectedOrderId, actualOrderDto.getId());
+        assertEquals(expectedUserId, actualOrderDto.getUserId());
+        assertTrue(EqualsBuilder.reflectionEquals(expectedOrderDto,
+                actualOrderDto, "orderItems", "orderDate"));
+        assertTrue(EqualsBuilder.reflectionEquals(expectedOrderItemDto,
+                actualOrderDto.getOrderItems().getFirst()));
+    }
+
+    @Test
+    @DisplayName("""
+            updateOrderStatus():
+             Should return 404 NOT FOUND when given invalid order ID
+            """)
+    void updateOrderStatus_InvalidOrderId_NotFound() throws Exception {
+        //Given
+        Long invalidOrderId = 99L;
+        String updatedOrderStatus = "DELIVERED";
+
+        UpdateOrderStatusRequestDto requestDto = new UpdateOrderStatusRequestDto(
+                updatedOrderStatus);
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        //When & Then
+        MvcResult result = mockMvc.perform(
+                        patch("/orders/{orderId}", invalidOrderId)
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+
+    @Test
+    @DisplayName("""
+            updateOrderStatus():
+             Should return 400 BAD REQUEST when given invalid request body
+            """)
+    void updateOrderStatus_InvalidRequestDto_BadRequest() throws Exception {
+        //Given
+        Long orderId = 1L;
+
+        UpdateOrderStatusRequestDto invalidRequestDto = new UpdateOrderStatusRequestDto(null);
+        String jsonRequest = objectMapper.writeValueAsString(invalidRequestDto);
+
+        //When & Then
+        MvcResult result = mockMvc.perform(
+                        patch("/orders/{orderId}", orderId)
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    @DisplayName("""
+            updateOrderStatus():
+             Should return 500 ACCESS DENIED when user doesn't have authority 'ADMIN'
+            """)
+    void updateOrderStatus_InvalidUserAuthority_BadRequest() throws Exception {
+        //Given
+        authenticateUserWithRoles("USER");
+        Long orderId = 1L;
+        String updatedOrderStatus = "DELIVERED";
+
+        UpdateOrderStatusRequestDto requestDto = new UpdateOrderStatusRequestDto(
+                updatedOrderStatus);
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        //When & Then
+        MvcResult result = mockMvc.perform(
+                        patch("/orders/{orderId}", orderId)
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError())
+                .andReturn();
+    }
+
+    void authenticateUserWithRoles(String... roles) {
+        User user = new User();
+        user.setId(3L);
+        user.setEmail(USER_EMAIL);
+        user.setPassword(USER_HASHED_PASSWORD);
+
+        when(userDetailsService.loadUserByUsername("user")).thenReturn(user);
+
+        List<SimpleGrantedAuthority> authorities = Arrays.stream(roles)
+                .map(SimpleGrantedAuthority::new)
+                .toList();
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, null, authorities)
+        );
+    }
+}
