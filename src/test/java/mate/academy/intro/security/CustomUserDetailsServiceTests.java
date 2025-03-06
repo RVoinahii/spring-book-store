@@ -68,6 +68,6 @@ public class CustomUserDetailsServiceTests {
         String actual = exception.getMessage();
 
         assertEquals("Can't find user by email:" + invalidEmail, exception.getMessage());
-        verify(userRepository).findByEmail(invalidEmail); // Перевірка, що метод викликався
+        verify(userRepository).findByEmail(invalidEmail);
     }
 }

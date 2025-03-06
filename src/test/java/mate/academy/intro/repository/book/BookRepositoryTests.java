@@ -5,7 +5,6 @@ import static mate.academy.intro.util.TestBookDataUtil.PAGE_SIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import mate.academy.intro.config.CustomMySqlContainer;
 import mate.academy.intro.model.Book;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,8 +21,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class BookRepositoryTests {
-    private static CustomMySqlContainer mySqlContainer = CustomMySqlContainer.getInstance();
-
     @Autowired
     private BookRepository bookRepository;
 

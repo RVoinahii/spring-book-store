@@ -7,6 +7,7 @@ TRUNCATE TABLE books_categories;
 TRUNCATE TABLE books;
 TRUNCATE TABLE categories;
 TRUNCATE TABLE orders;
+TRUNCATE TABLE users_roles;
 TRUNCATE TABLE users;
 
 SET FOREIGN_KEY_CHECKS = 1;

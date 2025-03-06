@@ -3,7 +3,6 @@ package mate.academy.intro.repository.role;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
-import mate.academy.intro.config.CustomMySqlContainer;
 import mate.academy.intro.model.Role;
 import mate.academy.intro.model.Role.RoleName;
 import org.junit.jupiter.api.DisplayName;
@@ -18,8 +17,6 @@ import org.testcontainers.shaded.org.apache.commons.lang3.builder.EqualsBuilder;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class RoleRepositoryTests {
-    private static CustomMySqlContainer mySqlContainer = CustomMySqlContainer.getInstance();
-
     @Autowired
     private RoleRepository roleRepository;
 

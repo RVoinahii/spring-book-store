@@ -130,9 +130,9 @@ public class AuthenticationControllerTests {
     @Test
     @DisplayName("""
             login():
-             Should return 500 INTERNAL SERVER ERROR when given invalid credentials
+             Should return 401 UNAUTHORIZED when given invalid credentials
             """)
-    void login_InvalidCredentials_InternalServerError() throws Exception {
+    void login_InvalidCredentials_Unauthorized() throws Exception {
         //Given
         UserLoginRequestDto requestDto = new UserLoginRequestDto(
                 "invalid.example@gmail.com", "invalid password"
@@ -146,7 +146,7 @@ public class AuthenticationControllerTests {
                                 .content(jsonRequest)
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().isInternalServerError())
+                .andExpect(status().isUnauthorized())
                 .andReturn();
     }
 

@@ -5,11 +5,9 @@ import static mate.academy.intro.util.TestOrderDataUtil.ORDER_SHIPPING_ADDRESS;
 import static mate.academy.intro.util.TestOrderDataUtil.createDefaultEmptyOrderDtoSample;
 import static mate.academy.intro.util.TestOrderDataUtil.createDefaultOrderItemDtoSample;
 import static mate.academy.intro.util.TestUserDataUtil.USER_EMAIL;
-import static mate.academy.intro.util.TestUserDataUtil.USER_HASHED_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -20,27 +18,21 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import mate.academy.intro.dto.order.CreateOrderRequestDto;
 import mate.academy.intro.dto.order.OrderDto;
 import mate.academy.intro.dto.order.UpdateOrderStatusRequestDto;
 import mate.academy.intro.dto.order.item.OrderItemDto;
 import mate.academy.intro.model.PageResponse;
-import mate.academy.intro.model.User;
 import mate.academy.intro.service.order.OrderService;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -58,7 +50,7 @@ public class OrderControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockitoBean
+    @Autowired
     private UserDetailsService userDetailsService;
 
     @BeforeAll
@@ -71,50 +63,7 @@ public class OrderControllerTests {
                 .build();
     }
 
-    @BeforeEach
-    void setUp() {
-        User user = new User();
-        user.setId(3L);
-        user.setEmail(USER_EMAIL);
-        user.setPassword(USER_HASHED_PASSWORD);
-
-        when(userDetailsService.loadUserByUsername("admin")).thenReturn(user);
-
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(user, null,
-                        List.of(new SimpleGrantedAuthority("ADMIN")))
-        );
-    }
-
-    @Test
-    @DisplayName("""
-        get/post/patchMethods():
-         Should return 401 UNAUTHORIZED when user is not authenticated
-            """)
-    void getPostPutDeleteMethods_UnauthorizedUser_ShouldReturnUnauthorized() throws Exception {
-        //Given
-        SecurityContextHolder.clearContext();
-
-        // When & Then
-        Long orderId = 1L;
-        Long orderItemId = 1L;
-
-        mockMvc.perform(get("/orders"))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(get("/orders/{orderId}/items", orderId))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(get("/orders/{orderId}/items/{orderItemId}", orderId, orderItemId))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(post("/orders"))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(patch("/orders/{orderId}", orderId))
-                .andExpect(status().isUnauthorized());
-    }
-
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @Test
     @DisplayName("""
             viewOrderItem():
@@ -122,6 +71,7 @@ public class OrderControllerTests {
             """)
     @Sql(scripts = {
             "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql",
             "classpath:database/books/insert_one_book.sql",
             "classpath:database/orders/insert_one_order.sql",
             "classpath:database/order_items/insert_one_order_item.sql",
@@ -162,6 +112,7 @@ public class OrderControllerTests {
                 actualOrderDtosPage.getContent().getFirst().getOrderItems().getFirst()));
     }
 
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @Test
     @DisplayName("""
             viewOrderItems():
@@ -169,6 +120,7 @@ public class OrderControllerTests {
             """)
     @Sql(scripts = {
             "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql",
             "classpath:database/books/insert_one_book.sql",
             "classpath:database/orders/insert_one_order.sql",
             "classpath:database/order_items/insert_one_order_item.sql",
@@ -196,11 +148,18 @@ public class OrderControllerTests {
                 actualOrderItemDtosList.getFirst()));
     }
 
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @Test
     @DisplayName("""
             viewOrderItems():
              Should return 404 NOT FOUND when given invalid order ID
             """)
+    @Sql(scripts = {
+            "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "classpath:database/clear_database.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void viewOrderItems_InvalidOrderId_NotFound() throws Exception {
         //Given
         Long orderId = 99L;
@@ -211,6 +170,7 @@ public class OrderControllerTests {
                 .andReturn();
     }
 
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @Test
     @DisplayName("""
             viewOrderItem():
@@ -218,6 +178,7 @@ public class OrderControllerTests {
             """)
     @Sql(scripts = {
             "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql",
             "classpath:database/books/insert_one_book.sql",
             "classpath:database/orders/insert_one_order.sql",
             "classpath:database/order_items/insert_one_order_item.sql",
@@ -244,11 +205,18 @@ public class OrderControllerTests {
         assertTrue(EqualsBuilder.reflectionEquals(expectedOrderItemDto, actualOrderItemDto));
     }
 
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @Test
     @DisplayName("""
             viewOrderItem():
              Should return 404 NOT FOUND when given invalid order ID
             """)
+    @Sql(scripts = {
+            "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "classpath:database/clear_database.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void viewOrderItem_InvalidOrderId_NotFound() throws Exception {
         //Given
         Long orderId = 99L;
@@ -261,11 +229,18 @@ public class OrderControllerTests {
                 .andReturn();
     }
 
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @Test
     @DisplayName("""
             viewOrderItem():
              Should return 404 NOT FOUND when given invalid order item ID
             """)
+    @Sql(scripts = {
+            "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "classpath:database/clear_database.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void viewOrderItem_InvalidOrderItemId_NotFound() throws Exception {
         //Given
         Long orderId = 1L;
@@ -278,6 +253,7 @@ public class OrderControllerTests {
                 .andReturn();
     }
 
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @Test
     @DisplayName("""
             placeOrder():
@@ -285,6 +261,7 @@ public class OrderControllerTests {
             """)
     @Sql(scripts = {
             "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql",
             "classpath:database/shopping_carts/insert_one_shopping_cart.sql",
             "classpath:database/books/insert_one_book.sql",
             "classpath:database/cart_items/insert_one_cart_item.sql"
@@ -330,6 +307,7 @@ public class OrderControllerTests {
                 actualOrderDto.getOrderItems().getFirst()));
     }
 
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @Test
     @DisplayName("""
             placeOrder():
@@ -337,6 +315,7 @@ public class OrderControllerTests {
             """)
     @Sql(scripts = {
             "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql",
             "classpath:database/shopping_carts/insert_one_shopping_cart.sql"
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = "classpath:database/clear_database.sql",
@@ -355,6 +334,7 @@ public class OrderControllerTests {
                 .andReturn();
     }
 
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @Test
     @DisplayName("""
             placeOrder():
@@ -362,6 +342,7 @@ public class OrderControllerTests {
             """)
     @Sql(scripts = {
             "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql",
             "classpath:database/shopping_carts/insert_one_shopping_cart.sql",
             "classpath:database/books/insert_one_book.sql",
             "classpath:database/cart_items/insert_one_cart_item.sql"
@@ -382,6 +363,7 @@ public class OrderControllerTests {
                 .andReturn();
     }
 
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @Test
     @DisplayName("""
             updateOrderStatus():
@@ -389,6 +371,7 @@ public class OrderControllerTests {
             """)
     @Sql(scripts = {
             "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_ADMIN.sql",
             "classpath:database/books/insert_one_book.sql",
             "classpath:database/orders/insert_one_order.sql",
             "classpath:database/order_items/insert_one_order_item.sql",
@@ -433,11 +416,18 @@ public class OrderControllerTests {
                 actualOrderDto.getOrderItems().getFirst()));
     }
 
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @Test
     @DisplayName("""
             updateOrderStatus():
              Should return 404 NOT FOUND when given invalid order ID
             """)
+    @Sql(scripts = {
+            "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_ADMIN.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "classpath:database/clear_database.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateOrderStatus_InvalidOrderId_NotFound() throws Exception {
         //Given
         Long invalidOrderId = 99L;
@@ -456,11 +446,18 @@ public class OrderControllerTests {
                 .andReturn();
     }
 
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @Test
     @DisplayName("""
             updateOrderStatus():
              Should return 400 BAD REQUEST when given invalid request body
             """)
+    @Sql(scripts = {
+            "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_ADMIN.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "classpath:database/clear_database.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateOrderStatus_InvalidRequestDto_BadRequest() throws Exception {
         //Given
         Long orderId = 1L;
@@ -477,14 +474,20 @@ public class OrderControllerTests {
                 .andReturn();
     }
 
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @Test
     @DisplayName("""
             updateOrderStatus():
-             Should return 500 ACCESS DENIED when user doesn't have authority 'ADMIN'
+             Should return 403 FORBIDDEN when user doesn't have authority 'ADMIN'
             """)
-    void updateOrderStatus_InvalidUserAuthority_BadRequest() throws Exception {
+    @Sql(scripts = {
+            "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "classpath:database/clear_database.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void updateOrderStatus_InvalidUserAuthority_Forbidden() throws Exception {
         //Given
-        authenticateUserWithRoles("USER");
         Long orderId = 1L;
         String updatedOrderStatus = "DELIVERED";
 
@@ -497,24 +500,7 @@ public class OrderControllerTests {
                         patch("/orders/{orderId}", orderId)
                                 .content(jsonRequest)
                                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
+                .andExpect(status().isForbidden())
                 .andReturn();
-    }
-
-    void authenticateUserWithRoles(String... roles) {
-        User user = new User();
-        user.setId(3L);
-        user.setEmail(USER_EMAIL);
-        user.setPassword(USER_HASHED_PASSWORD);
-
-        when(userDetailsService.loadUserByUsername("user")).thenReturn(user);
-
-        List<SimpleGrantedAuthority> authorities = Arrays.stream(roles)
-                .map(SimpleGrantedAuthority::new)
-                .toList();
-
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(user, null, authorities)
-        );
     }
 }

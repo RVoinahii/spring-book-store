@@ -16,6 +16,8 @@ public class TestUserDataUtil {
             "$2a$10$40VcEX9yypgQXTJ0CL/oteEJuB03CJ0lGzxmhB1ZlsDDLL5LnHbga";
     public static final String USER_FIRST_NAME = "FirstName";
     public static final String USER_LAST_NAME = "LastName";
+    public static final String USER_AUTHORITY = "USER";
+    public static final String ADMIN_AUTHORITY = "ADMIN";
 
     public static UserRegistrationRequestDto createRegistrationRequestDtoSample() {
         UserRegistrationRequestDto requestDto = new UserRegistrationRequestDto();

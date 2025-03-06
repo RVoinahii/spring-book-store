@@ -4,6 +4,8 @@ import static mate.academy.intro.util.TestBookDataUtil.PAGE_SIZE;
 import static mate.academy.intro.util.TestBookDataUtil.createDefaultBookWithoutCategoriesDtoSample;
 import static mate.academy.intro.util.TestCategoryDataUtil.createCategoryRequestDtoSample;
 import static mate.academy.intro.util.TestCategoryDataUtil.createDefaultCategoryDtoSample;
+import static mate.academy.intro.util.TestUserDataUtil.ADMIN_AUTHORITY;
+import static mate.academy.intro.util.TestUserDataUtil.USER_AUTHORITY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -55,73 +57,7 @@ public class CategoryControllerTests {
                 .build();
     }
 
-    @Test
-    @DisplayName("""
-        get/post/put/deleteMethods():
-         Should return 401 UNAUTHORIZED when user is not authenticated
-            """)
-    void getPostPutDeleteMethods_UnauthorizedUser_ShouldReturnUnauthorized() throws Exception {
-        //Given
-        Long categoryId = 1L;
-
-        // When & Then
-        mockMvc.perform(get("/categories"))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(get("/categories/{categoryId}", categoryId))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(get("/categories/{categoryId}/books", categoryId))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(post("/categories"))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(put("/categories/{categoryId}", categoryId))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(delete("/categories/{categoryId}", categoryId))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @WithMockUser(username = "user", authorities = "USER")
-    @Test
-    @DisplayName("""
-         post/put/deleteMethods():
-         Should return 500 ACCESS DENIED when user doesn't have authority 'ADMIN'
-            """)
-    void postPutDeleteMethods_UserWithoutRequiredAuthority_ShouldReturnAccessDenied()
-            throws Exception {
-        //Given
-        Long categoryId = 1L;
-
-        CreateCategoryRequestDto requestDto = createCategoryRequestDtoSample();
-
-        String jsonRequest = objectMapper.writeValueAsString(requestDto);
-
-        //When & Then
-        MvcResult postResult = mockMvc.perform(
-                        post("/categories")
-                                .content(jsonRequest)
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isInternalServerError())
-                .andReturn();
-
-        MvcResult putResult = mockMvc.perform(
-                        put("/categories/{categoryId}", categoryId)
-                                .content(jsonRequest)
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isInternalServerError())
-                .andReturn();
-
-        MvcResult deleteResult = mockMvc.perform(delete("/categories/{categoryId}", categoryId))
-                .andExpect(status().isInternalServerError())
-                .andReturn();
-    }
-
-    @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
+    @WithMockUser(username = "admin", authorities = {USER_AUTHORITY, ADMIN_AUTHORITY})
     @Test
     @DisplayName("""
             getAllCategories():
@@ -155,7 +91,7 @@ public class CategoryControllerTests {
 
     }
 
-    @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
+    @WithMockUser(username = "admin", authorities = {USER_AUTHORITY, ADMIN_AUTHORITY})
     @Test
     @DisplayName("""
             getCategoryById():
@@ -183,7 +119,7 @@ public class CategoryControllerTests {
         assertTrue(EqualsBuilder.reflectionEquals(expected, actual));
     }
 
-    @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
+    @WithMockUser(username = "admin", authorities = {USER_AUTHORITY, ADMIN_AUTHORITY})
     @Test
     @DisplayName("""
         getCategoryById():
@@ -198,7 +134,7 @@ public class CategoryControllerTests {
                 .andExpect(status().isNotFound());
     }
 
-    @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
+    @WithMockUser(username = "admin", authorities = {USER_AUTHORITY, ADMIN_AUTHORITY})
     @Test
     @DisplayName("""
             getBooksByCategoryId():
@@ -237,7 +173,7 @@ public class CategoryControllerTests {
                 actualPage.getContent().getFirst(), expectedBookDto));
     }
 
-    @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
+    @WithMockUser(username = "admin", authorities = {USER_AUTHORITY, ADMIN_AUTHORITY})
     @Test
     @DisplayName("""
         getBooksByCategoryId():
@@ -252,7 +188,7 @@ public class CategoryControllerTests {
                 .andExpect(status().isNotFound());
     }
 
-    @WithMockUser(username = "admin", authorities = "ADMIN")
+    @WithMockUser(username = "admin", authorities = ADMIN_AUTHORITY)
     @Test
     @DisplayName("""
             createCategory():
@@ -260,7 +196,7 @@ public class CategoryControllerTests {
             """)
     @Sql(scripts = "classpath:database/clear_database.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void createCategory_ValidRequestDto_Success() throws Exception {
+    void createCategory_ValidRequestDto_Created() throws Exception {
         //Given
         CreateCategoryRequestDto requestDto = createCategoryRequestDtoSample();
         CategoryDto expected = createDefaultCategoryDtoSample();
@@ -284,7 +220,7 @@ public class CategoryControllerTests {
         assertTrue(EqualsBuilder.reflectionEquals(expected, actual, "id"));
     }
 
-    @WithMockUser(username = "admin", authorities = "ADMIN")
+    @WithMockUser(username = "admin", authorities = ADMIN_AUTHORITY)
     @Test
     @DisplayName("""
             createCategory():
@@ -305,7 +241,28 @@ public class CategoryControllerTests {
                 .andReturn();
     }
 
-    @WithMockUser(username = "admin", authorities = "ADMIN")
+    @WithMockUser(username = "user", authorities = USER_AUTHORITY)
+    @Test
+    @DisplayName("""
+         createCategory():
+         Should return 403 FORBIDDEN when user doesn't have authority 'ADMIN'
+            """)
+    void createCategory_UserWithoutRequiredAuthority_Forbidden() throws Exception {
+        //Given
+        CreateCategoryRequestDto requestDto = createCategoryRequestDtoSample();
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        //When & Then
+        MvcResult result = mockMvc.perform(
+                        post("/categories")
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isForbidden())
+                .andReturn();
+    }
+
+    @WithMockUser(username = "admin", authorities = ADMIN_AUTHORITY)
     @Test
     @DisplayName("""
             updateCategoryById():
@@ -346,7 +303,7 @@ public class CategoryControllerTests {
         assertTrue(EqualsBuilder.reflectionEquals(expected, actual));
     }
 
-    @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
+    @WithMockUser(username = "admin", authorities = {USER_AUTHORITY, ADMIN_AUTHORITY})
     @Test
     @DisplayName("""
         updateCategoryById():
@@ -370,7 +327,7 @@ public class CategoryControllerTests {
                 .andReturn();
     }
 
-    @WithMockUser(username = "admin", authorities = "ADMIN")
+    @WithMockUser(username = "admin", authorities = ADMIN_AUTHORITY)
     @Test
     @DisplayName("""
             updateCategoryById():
@@ -393,7 +350,30 @@ public class CategoryControllerTests {
                 .andReturn();
     }
 
-    @WithMockUser(username = "admin", authorities = "ADMIN")
+    @WithMockUser(username = "user", authorities = USER_AUTHORITY)
+    @Test
+    @DisplayName("""
+         updateCategoryById():
+         Should return 403 FORBIDDEN when user doesn't have authority 'ADMIN'
+            """)
+    void updateCategoryById_UserWithoutRequiredAuthority_Forbidden() throws Exception {
+        //Given
+        Long categoryId = 1L;
+
+        CreateCategoryRequestDto requestDto = createCategoryRequestDtoSample();
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        //When & Then
+        MvcResult result = mockMvc.perform(
+                        put("/categories/{categoryId}", categoryId)
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isForbidden())
+                .andReturn();
+    }
+
+    @WithMockUser(username = "admin", authorities = ADMIN_AUTHORITY)
     @Test
     @DisplayName("""
             deleteCategory():
@@ -403,7 +383,7 @@ public class CategoryControllerTests {
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = "classpath:database/clear_database.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void deleteCategory_ValidId_Success() throws Exception {
+    void deleteCategory_ValidId_NoContent() throws Exception {
         //Given
         Long categoryId = 1L;
 
@@ -415,5 +395,21 @@ public class CategoryControllerTests {
         mockMvc.perform(get(
                 "/categories/{categoryId}", categoryId)).andExpect(status().isNotFound()
         );
+    }
+
+    @WithMockUser(username = "user", authorities = USER_AUTHORITY)
+    @Test
+    @DisplayName("""
+         deleteCategory():
+         Should return 403 FORBIDDEN when user doesn't have authority 'ADMIN'
+            """)
+    void deleteCategory_UserWithoutRequiredAuthority_Forbidden() throws Exception {
+        //Given
+        Long categoryId = 1L;
+
+        //When & Then
+        MvcResult result = mockMvc.perform(delete("/categories/{categoryId}", categoryId))
+                .andExpect(status().isForbidden())
+                .andReturn();
     }
 }

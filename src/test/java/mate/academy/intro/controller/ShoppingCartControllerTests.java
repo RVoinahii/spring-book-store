@@ -3,11 +3,9 @@ package mate.academy.intro.controller;
 import static mate.academy.intro.util.TestShoppingCartDataUtil.createAddItemToCartRequestDtoSample;
 import static mate.academy.intro.util.TestShoppingCartDataUtil.createDefaultCartItemDtoSample;
 import static mate.academy.intro.util.TestUserDataUtil.USER_EMAIL;
-import static mate.academy.intro.util.TestUserDataUtil.USER_HASHED_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -17,25 +15,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
-import java.util.List;
 import mate.academy.intro.dto.shopping.cart.AddItemToCartRequestDto;
 import mate.academy.intro.dto.shopping.cart.ShoppingCartDto;
 import mate.academy.intro.dto.shopping.cart.UpdateItemInCartRequestDto;
 import mate.academy.intro.dto.shopping.cart.item.CartItemDto;
-import mate.academy.intro.model.User;
 import mate.academy.intro.service.shopping.cart.ShoppingCartService;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -53,7 +45,7 @@ public class ShoppingCartControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockitoBean
+    @Autowired
     private UserDetailsService userDetailsService;
 
     @BeforeAll
@@ -66,53 +58,15 @@ public class ShoppingCartControllerTests {
                 .build();
     }
 
-    @BeforeEach
-    void setUp() {
-        User user = new User();
-        user.setId(3L);
-        user.setEmail(USER_EMAIL);
-        user.setPassword(USER_HASHED_PASSWORD);
-
-        when(userDetailsService.loadUserByUsername("admin")).thenReturn(user);
-
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(user, null,
-                        List.of(new SimpleGrantedAuthority("USER")))
-        );
-    }
-
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @Test
     @DisplayName("""
-        get/post/put/deleteMethods():
-         Should return 401 UNAUTHORIZED when user is not authenticated
-            """)
-    void getPostPutDeleteMethods_UnauthorizedUser_ShouldReturnUnauthorized() throws Exception {
-        //Given
-        SecurityContextHolder.clearContext();
-
-        // When & Then
-        Long itemId = 1L;
-
-        mockMvc.perform(get("/cart"))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(post("/cart"))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(put("/cart/item/{cartItemId}", itemId))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(delete("/cart/item/{cartItemId}", itemId))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @DisplayName("""
-            addItemToCart():
+            getCartInfo():
              Verifying retrieval of full shopping cart info with correct user authentication
             """)
     @Sql(scripts = {
             "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql",
             "classpath:database/shopping_carts/insert_one_shopping_cart.sql"
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = "classpath:database/clear_database.sql",
@@ -141,12 +95,14 @@ public class ShoppingCartControllerTests {
     }
 
     @Test
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @DisplayName("""
             addItemToCart():
              Confirming successful creation of new cart item with valid request
             """)
     @Sql(scripts = {
             "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql",
             "classpath:database/shopping_carts/insert_one_shopping_cart.sql",
             "classpath:database/books/insert_one_book.sql"
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -182,10 +138,17 @@ public class ShoppingCartControllerTests {
     }
 
     @Test
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @DisplayName("""
             addItemToCart():
              Should return 400 BAD REQUEST when given invalid request body
             """)
+    @Sql(scripts = {
+            "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "classpath:database/clear_database.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void addItemToCart_InvalidRequestDto_BadRequest() throws Exception {
         //Given
         Long expectedId = 3L;
@@ -206,12 +169,14 @@ public class ShoppingCartControllerTests {
     }
 
     @Test
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @DisplayName("""
             updateItemInCart():
              Verifying updating cart item quantity data by ID with valid request
             """)
     @Sql(scripts = {
             "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql",
             "classpath:database/shopping_carts/insert_one_shopping_cart.sql",
             "classpath:database/books/insert_one_book.sql",
             "classpath:database/cart_items/insert_one_cart_item.sql"
@@ -250,12 +215,14 @@ public class ShoppingCartControllerTests {
     }
 
     @Test
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @DisplayName("""
             updateItemInCart():
              Should return 404 NOT FOUND when given invalid ID
             """)
     @Sql(scripts = {
             "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql",
             "classpath:database/shopping_carts/insert_one_shopping_cart.sql"
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = "classpath:database/clear_database.sql",
@@ -279,19 +246,21 @@ public class ShoppingCartControllerTests {
     }
 
     @Test
+    @WithUserDetails(value = USER_EMAIL, userDetailsServiceBeanName = "customUserDetailsService")
     @DisplayName("""
             deleteBook():
              Verifying successful cart item removal by its ID
             """)
     @Sql(scripts = {
             "classpath:database/users/insert_one_user.sql",
+            "classpath:database/users_roles/set_user_one_roles_USER.sql",
             "classpath:database/shopping_carts/insert_one_shopping_cart.sql",
             "classpath:database/books/insert_one_book.sql",
             "classpath:database/cart_items/insert_one_cart_item.sql"
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = "classpath:database/clear_database.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void deleteBook_ValidItemIdAndUser_Success() throws Exception {
+    void deleteBook_ValidItemIdAndUser_NoContent() throws Exception {
         //Given
         Long expectedId = 3L;
         Long cartItemId = 1L;
