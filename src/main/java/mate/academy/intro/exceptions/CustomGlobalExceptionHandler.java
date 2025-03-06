@@ -1,5 +1,6 @@
 package mate.academy.intro.exceptions;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -7,6 +8,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,6 +23,30 @@ public class CustomGlobalExceptionHandler {
     private static final String STATUS = "status";
     private static final String ERROR = "error";
     private static final String MESSAGE = "message";
+
+    @ExceptionHandler(InternalAuthenticationServiceException.class)
+    public ResponseEntity<Map<String, Object>> handleInternalAuthenticationServiceException(
+            InternalAuthenticationServiceException exception) {
+        return buildErrorResponse(exception, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleBadCredentialsException(
+            BadCredentialsException exception) {
+        return buildErrorResponse(exception, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAuthorizationDeniedException(
+            AuthorizationDeniedException exception) {
+        return buildErrorResponse(exception, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDeniedException(
+            AccessDeniedException exception) {
+        return buildErrorResponse(exception, HttpStatus.FORBIDDEN);
+    }
 
     @ExceptionHandler(DataProcessingException.class)
     public ResponseEntity<Map<String, Object>> handleDataProcessingExceptions(

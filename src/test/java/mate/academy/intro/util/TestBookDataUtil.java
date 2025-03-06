@@ -1,52 +1,24 @@
 package mate.academy.intro.util;
 
+import static mate.academy.intro.util.TestCategoryDataUtil.CATEGORY_NAME;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import mate.academy.intro.dto.book.BookDto;
 import mate.academy.intro.dto.book.BookWithoutCategoriesDto;
 import mate.academy.intro.dto.book.CreateBookRequestDto;
-import mate.academy.intro.dto.category.CategoryDto;
-import mate.academy.intro.dto.category.CreateCategoryRequestDto;
 import mate.academy.intro.model.Book;
 import mate.academy.intro.model.Category;
 
-public class TestDataUtil {
+public class TestBookDataUtil {
+    public static final Long DEFAULT_ID_SAMPLE = 1L;
     public static final int PAGE_NUMBER = 0;
     public static final int PAGE_SIZE = 10;
-    public static final Long INVALID_ID_SAMPLE = 99L;
-    public static final Long CATEGORY_ID = 1L;
-    public static final String CATEGORY_NAME = "CategoryOne";
-    public static final Long BOOK_ID = 1L;
     public static final String BOOK_TITLE = "BookOne";
     public static final String BOOK_AUTHOR = "AuthorOne";
     public static final String BOOK_ISBN = "978-3-16-148410-0";
     public static final BigDecimal BOOK_PRICE = BigDecimal.valueOf(39.99);
-
-    public static CreateCategoryRequestDto createCategoryRequestDtoSample() {
-        return new CreateCategoryRequestDto("CategoryOne", null);
-    }
-
-    public static Category createCategorySample(Long id) {
-        Category category = new Category();
-        category.setId(id);
-        category.setName(CATEGORY_NAME);
-        return category;
-    }
-
-    public static CategoryDto createCustomCategoryDtoSample(Category category) {
-        CategoryDto categoryDto = new CategoryDto();
-        categoryDto.setId(categoryDto.getId());
-        categoryDto.setName(category.getName());
-        return categoryDto;
-    }
-
-    public static CategoryDto createDefaultCategoryDtoSample() {
-        CategoryDto categoryDto = new CategoryDto();
-        categoryDto.setId(CATEGORY_ID);
-        categoryDto.setName(CATEGORY_NAME);
-        return categoryDto;
-    }
 
     public static CreateBookRequestDto createBookRequestDtoSample() {
         CreateBookRequestDto requestDto = new CreateBookRequestDto();
@@ -58,25 +30,25 @@ public class TestDataUtil {
         return requestDto;
     }
 
-    public static Book createBookSample(Long id) {
+    public static Book createDefaultBookSample() {
         Book book = new Book();
-        book.setId(id);
+        book.setId(DEFAULT_ID_SAMPLE);
         book.setTitle(BOOK_TITLE);
         book.setAuthor(BOOK_AUTHOR);
         book.setIsbn(BOOK_ISBN);
         book.setPrice(BOOK_PRICE);
 
         Category category = new Category();
-        category.setId(id);
+        category.setId(DEFAULT_ID_SAMPLE);
         category.setName(CATEGORY_NAME);
 
         book.setCategories(Set.of(category));
         return book;
     }
 
-    public static Book createBookWithCustomCategorySample(Long id, Category category) {
+    public static Book createBookWithCustomCategorySample(Category category) {
         Book book = new Book();
-        book.setId(id);
+        book.setId(DEFAULT_ID_SAMPLE);
         book.setTitle(BOOK_TITLE);
         book.setAuthor(BOOK_AUTHOR);
         book.setIsbn(BOOK_ISBN);
@@ -85,7 +57,7 @@ public class TestDataUtil {
         return book;
     }
 
-    public static BookDto createCustomBookDtoSample(Book book) {
+    public static BookDto createBookDtoSampleFromEntity(Book book) {
         BookDto bookDto = new BookDto();
         bookDto.setId(book.getId());
         bookDto.setTitle(book.getTitle());
@@ -112,7 +84,8 @@ public class TestDataUtil {
         return bookDto;
     }
 
-    public static BookWithoutCategoriesDto createCustomBookWithoutCategoriesDtoSample(Book book) {
+    public static BookWithoutCategoriesDto createBookWithoutCategoriesDtoSampleFromEntity(
+            Book book) {
         BookWithoutCategoriesDto bookDto = new BookWithoutCategoriesDto();
         bookDto.setId(book.getId());
         bookDto.setTitle(book.getTitle());

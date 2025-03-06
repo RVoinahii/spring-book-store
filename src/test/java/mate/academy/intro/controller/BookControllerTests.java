@@ -1,10 +1,13 @@
 package mate.academy.intro.controller;
 
-import static mate.academy.intro.util.TestDataUtil.PAGE_SIZE;
-import static mate.academy.intro.util.TestDataUtil.createBookRequestDtoSample;
-import static mate.academy.intro.util.TestDataUtil.createDefaultBookDtoSample;
+import static mate.academy.intro.util.TestBookDataUtil.PAGE_SIZE;
+import static mate.academy.intro.util.TestBookDataUtil.createBookRequestDtoSample;
+import static mate.academy.intro.util.TestBookDataUtil.createDefaultBookDtoSample;
+import static mate.academy.intro.util.TestUserDataUtil.ADMIN_AUTHORITY;
+import static mate.academy.intro.util.TestUserDataUtil.USER_AUTHORITY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -14,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import mate.academy.intro.dto.book.BookDto;
 import mate.academy.intro.dto.book.CreateBookRequestDto;
 import mate.academy.intro.model.PageResponse;
@@ -34,6 +38,7 @@ import org.testcontainers.shaded.org.apache.commons.lang3.builder.EqualsBuilder;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class BookControllerTests {
+
     protected static MockMvc mockMvc;
 
     @Autowired
@@ -52,7 +57,7 @@ public class BookControllerTests {
                 .build();
     }
 
-    @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
+    @WithMockUser(username = "admin", authorities = {USER_AUTHORITY, ADMIN_AUTHORITY})
     @Test
     @DisplayName("""
             getAllBooks():
@@ -67,8 +72,10 @@ public class BookControllerTests {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void getAllBooks_ValidPageable_Success() throws Exception {
         //Given
+        Long expectedBookId = 1L;
+
         BookDto expectedBookDto = createDefaultBookDtoSample();
-        expectedBookDto.setId(1L);
+        expectedBookDto.setId(expectedBookId);
 
         //When
         MvcResult result = mockMvc.perform(get("/books"))
@@ -82,13 +89,14 @@ public class BookControllerTests {
         assertNotNull(actualBookDtosPage);
         assertEquals(1, actualBookDtosPage.getTotalElements());
         assertEquals(PAGE_SIZE, actualBookDtosPage.getSize());
-        EqualsBuilder.reflectionEquals(actualBookDtosPage.getContent().getFirst(), expectedBookDto);
+        assertTrue(EqualsBuilder.reflectionEquals(
+                actualBookDtosPage.getContent().getFirst(), expectedBookDto));
     }
 
-    @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
+    @WithMockUser(username = "admin", authorities = {USER_AUTHORITY, ADMIN_AUTHORITY})
     @Test
     @DisplayName("""
-            getById():
+            getBookById():
              Verifying retrieval of a book by its ID
             """)
     @Sql(scripts = {
@@ -98,22 +106,39 @@ public class BookControllerTests {
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = "classpath:database/clear_database.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void getById_ValidId_Success() throws Exception {
+    void getBookById_ValidId_Success() throws Exception {
         //Given
+        Long expectedBookId = 1L;
+
         BookDto expectedBookDto = createDefaultBookDtoSample();
-        expectedBookDto.setId(1L);
+        expectedBookDto.setId(expectedBookId);
         //When
-        MvcResult result = mockMvc.perform(get("/books/1"))
+        MvcResult result = mockMvc.perform(get("/books/{bookId}", expectedBookId))
                 .andExpect(status().isOk())
                 .andReturn();
         //Then
         BookDto actualBookDto = objectMapper.readValue(result.getResponse()
                 .getContentAsString(), BookDto.class);
         assertNotNull(actualBookDto);
-        EqualsBuilder.reflectionEquals(actualBookDto, expectedBookDto);
+        assertTrue(EqualsBuilder.reflectionEquals(actualBookDto, expectedBookDto));
     }
 
-    @WithMockUser(username = "admin", authorities = {"USER", "ADMIN"})
+    @WithMockUser(username = "admin", authorities = {USER_AUTHORITY, ADMIN_AUTHORITY})
+    @Test
+    @DisplayName("""
+        getBookById():
+         Should return 404 NOT FOUND when given invalid ID
+            """)
+    void getBookById_InvalidId_NotFound() throws Exception {
+        //Given
+        Long invalidId = 99L;
+
+        // When & Then
+        mockMvc.perform(get("/books/{bookId}", invalidId))
+                .andExpect(status().isNotFound());
+    }
+
+    @WithMockUser(username = "admin", authorities = {USER_AUTHORITY, ADMIN_AUTHORITY})
     @Test
     @DisplayName("""
             search():
@@ -128,12 +153,18 @@ public class BookControllerTests {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void search_WithValidParameters_Success() throws Exception {
         //Given
-        String expectedIsbn = "978-3-16-148410-2";
         Long expectedId = 3L;
+        String expectedTitle = "BookThree";
+        String expectedAuthor = "AuthorThree";
+        String expectedIsbn = "978-3-16-148410-2";
+        Long expectedCategoryId = 3L;
 
         BookDto expectedBookDto = createDefaultBookDtoSample();
         expectedBookDto.setId(expectedId);
+        expectedBookDto.setTitle(expectedTitle);
+        expectedBookDto.setAuthor(expectedAuthor);
         expectedBookDto.setIsbn(expectedIsbn);
+        expectedBookDto.setCategoryIds(List.of(expectedCategoryId));
 
         //When
         MvcResult result = mockMvc.perform(get("/books/search")
@@ -154,10 +185,11 @@ public class BookControllerTests {
         assertNotNull(actualBookDtosPage);
         assertEquals(1, actualBookDtosPage.getTotalElements());
         assertEquals(PAGE_SIZE, actualBookDtosPage.getSize());
-        EqualsBuilder.reflectionEquals(actualBookDtosPage.getContent().getFirst(), expectedBookDto);
+        assertTrue(EqualsBuilder.reflectionEquals(
+                actualBookDtosPage.getContent().getFirst(), expectedBookDto));
     }
 
-    @WithMockUser(username = "admin", authorities = "ADMIN")
+    @WithMockUser(username = "admin", authorities = ADMIN_AUTHORITY)
     @Test
     @DisplayName("""
             createBook():
@@ -168,7 +200,7 @@ public class BookControllerTests {
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = "classpath:database/clear_database.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void createBook_ValidRequestDto_Success() throws Exception {
+    void createBook_ValidRequestDto_Created() throws Exception {
         //Given
         CreateBookRequestDto requestDto = createBookRequestDtoSample();
         BookDto expectedBookDto = createDefaultBookDtoSample();
@@ -189,10 +221,52 @@ public class BookControllerTests {
                 .getContentAsString(), BookDto.class);
         assertNotNull(actualBookDto);
         assertNotNull(actualBookDto.getId());
-        EqualsBuilder.reflectionEquals(actualBookDto, expectedBookDto, "id");
+        assertTrue(EqualsBuilder.reflectionEquals(actualBookDto, expectedBookDto, "id"));
     }
 
-    @WithMockUser(username = "admin", authorities = "ADMIN")
+    @WithMockUser(username = "admin", authorities = ADMIN_AUTHORITY)
+    @Test
+    @DisplayName("""
+            createBook():
+             Should return 400 BAD REQUEST when given invalid request body
+            """)
+    void createBook_InvalidRequestDto_BadRequest() throws Exception {
+        //Given
+        CreateBookRequestDto requestDto = new CreateBookRequestDto();
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        //When & Then
+        MvcResult result = mockMvc.perform(
+                        post("/books")
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @WithMockUser(username = "user", authorities = USER_AUTHORITY)
+    @Test
+    @DisplayName("""
+        createBook():
+         Should return 403 FORBIDDEN when user doesn't have authority 'ADMIN'
+            """)
+    void createBook_UserWithoutRequiredAuthority_Forbidden() throws Exception {
+        //Given
+        CreateBookRequestDto requestDto = createBookRequestDtoSample();
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        //When & Then
+        MvcResult result = mockMvc.perform(
+                        post("/books")
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isForbidden())
+                .andReturn();
+    }
+
+    @WithMockUser(username = "admin", authorities = ADMIN_AUTHORITY)
     @Test
     @DisplayName("""
             updateBookById():
@@ -211,8 +285,10 @@ public class BookControllerTests {
         requestDto.setTitle("NewTitle");
         requestDto.setAuthor("NewAuthor");
 
+        Long expectedBookId = 1L;
+
         BookDto expectedBookDto = createDefaultBookDtoSample();
-        expectedBookDto.setId(1L);
+        expectedBookDto.setId(expectedBookId);
         expectedBookDto.setTitle("NewTitle");
         expectedBookDto.setAuthor("NewAuthor");
 
@@ -220,7 +296,7 @@ public class BookControllerTests {
 
         //When
         MvcResult result = mockMvc.perform(
-                        put("/books/1")
+                        put("/books/{bookId}", expectedBookId)
                                 .content(jsonRequest)
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -232,10 +308,80 @@ public class BookControllerTests {
                 .getContentAsString(), BookDto.class);
         assertNotNull(actualBookDto);
         assertNotNull(actualBookDto.getId());
-        EqualsBuilder.reflectionEquals(actualBookDto, expectedBookDto);
+        assertTrue(EqualsBuilder.reflectionEquals(actualBookDto, expectedBookDto));
     }
 
-    @WithMockUser(username = "admin", authorities = "ADMIN")
+    @WithMockUser(username = "admin", authorities = {USER_AUTHORITY, ADMIN_AUTHORITY})
+    @Test
+    @DisplayName("""
+        updateBookById():
+         Should return 404 NOT FOUND when given invalid ID
+            """)
+    void updateBookByById_InvalidId_NotFound() throws Exception {
+        //Given
+        Long invalidId = 99L;
+
+        CreateBookRequestDto requestDto = createBookRequestDtoSample();
+
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        // When & Then
+        MvcResult result = mockMvc.perform(
+                        put("/books/{bookId}", invalidId)
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+
+    @WithMockUser(username = "admin", authorities = ADMIN_AUTHORITY)
+    @Test
+    @DisplayName("""
+            updateBookById():
+             Should return 400 BAD REQUEST when given invalid request body
+            """)
+    void updateBookById_InvalidRequestDto_BadRequest() throws Exception {
+        //Given
+        Long bookId = 1L;
+
+        CreateBookRequestDto requestDto = new CreateBookRequestDto();
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        //When & Then
+        MvcResult result = mockMvc.perform(
+                        put("/books/{bookId}", bookId)
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @WithMockUser(username = "user", authorities = USER_AUTHORITY)
+    @Test
+    @DisplayName("""
+        updateBookById():
+         Should return 403 FORBIDDEN when user doesn't have authority 'ADMIN'
+            """)
+    void updateBookById_UserWithoutRequiredAuthority_Forbidden() throws Exception {
+        //Given
+        Long bookId = 1L;
+
+        CreateBookRequestDto requestDto = createBookRequestDtoSample();
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        //When & Then
+        MvcResult result = mockMvc.perform(
+                        put("/books/{bookId}", bookId)
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isForbidden())
+                .andReturn();
+    }
+
+    @WithMockUser(username = "admin", authorities = ADMIN_AUTHORITY)
     @Test
     @DisplayName("""
             deleteBook():
@@ -248,12 +394,31 @@ public class BookControllerTests {
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = "classpath:database/clear_database.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void deleteBook_ValidId_Success() throws Exception {
+    void deleteBook_ValidId_NoContent() throws Exception {
+        //Given
+        Long bookId = 1L;
+
         //When
-        MvcResult result = mockMvc.perform(delete("/books/1"))
+        MvcResult result = mockMvc.perform(delete("/books/{bookId}", bookId))
                 .andExpect(status().isNoContent())
                 .andReturn();
         //Then
-        mockMvc.perform(get("/books/1")).andExpect(status().isNotFound());
+        mockMvc.perform(get("/books/{bookId}", bookId)).andExpect(status().isNotFound());
+    }
+
+    @WithMockUser(username = "user", authorities = USER_AUTHORITY)
+    @Test
+    @DisplayName("""
+        deleteBook():
+         Should return 403 FORBIDDEN when user doesn't have authority 'ADMIN'
+            """)
+    void deleteBook_UserWithoutRequiredAuthority_Forbidden() throws Exception {
+        //Given
+        Long bookId = 1L;
+
+        //When & Then
+        MvcResult result = mockMvc.perform(delete("/books/{bookId}", bookId))
+                .andExpect(status().isForbidden())
+                .andReturn();
     }
 }

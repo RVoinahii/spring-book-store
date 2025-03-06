@@ -1,6 +1,7 @@
 package mate.academy.intro.repository.book.spec;
 
 import static mate.academy.intro.repository.book.BookSpecificationBuilder.ISBN;
+import static mate.academy.intro.util.TestBookDataUtil.BOOK_ISBN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -63,7 +64,7 @@ public class IsbnSpecificationProviderTests {
             """)
     void getSpecification_returnsCorrectPredicate() {
         //Given
-        String isbn = "978-3-16-148410-0";
+        String isbn = BOOK_ISBN;
 
         when(root.<String>get(ISBN)).thenReturn(isbnPath);
         when(isbnPath.in(isbn)).thenReturn(excpectedPredicate);

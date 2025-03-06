@@ -42,6 +42,7 @@ public class ShoppingCartController {
         return shoppingCartService.getCartInfo(getAuthenticatedUserId(authentication));
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping
     @Operation(

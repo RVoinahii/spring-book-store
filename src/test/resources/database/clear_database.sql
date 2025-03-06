@@ -1,3 +1,13 @@
-DELETE FROM books_categories;
-DELETE FROM books;
-DELETE FROM categories;
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE cart_items;
+TRUNCATE TABLE shopping_carts;
+TRUNCATE TABLE order_items;
+TRUNCATE TABLE books_categories;
+TRUNCATE TABLE books;
+TRUNCATE TABLE categories;
+TRUNCATE TABLE orders;
+TRUNCATE TABLE users_roles;
+TRUNCATE TABLE users;
+
+SET FOREIGN_KEY_CHECKS = 1;
