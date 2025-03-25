@@ -1,4 +1,4 @@
-# 📚Spring Book Store
+![Logo](🍃Spring_Book_Store_📚.png)
 ## 📝Introduction
 
 The Online Book Store is a web application that allows users to browse, search,
@@ -10,7 +10,7 @@ This project was developed as part of a learning module to gain hands-on experie
 
 ## ✨Features
 ### 🛒Shopper (USER)
-- **Authentication & Authorization** - Register, log in, and access role-based features.
+- **Authentication & Authorization** - Register and log in.
 
 - **Book Browsing** - View all books, search by parameters, and explore categories.
 
@@ -21,16 +21,16 @@ This project was developed as part of a learning module to gain hands-on experie
 ### 🛠️ Manager (ADMIN)
 - **Book Management** - Add, update, and remove books from the store.
 - **Category Management** - Create, modify, and delete book categories.
-- **Order Management** - Update order statuses (e.g., "Shipped", "Delivered").
+- **Order Management** - Update order statuses (*e.g., "SHIPPED", "DELIVERED"*).
 
 ---
 
 # 🌟Technologies Used
-### 🖥️Programing Language
+## 🖥️Programing Language
 
 - **Java 21** – Primary programming language.
 
-### ⚙️Frameworks & Libraries
+## ⚙️Frameworks & Libraries
 
 - **Spring Boot** – Framework for backend development.
 - **Spring Security** – Authentication and authorization.
@@ -38,37 +38,37 @@ This project was developed as part of a learning module to gain hands-on experie
 - **Lombok** - Reduces boilerplate code (*e.g., getters, setters*).
 - **MapStruck** - Mapping between DTOs and entities.
 
-### 🗄️Database & Migrations
+## 🗄️Database & Migrations
 
 - **MySQL** – Relational database.
 - **Liquibase** — Database schema migration tool.
 
-### 🧪Testing
+## 🧪Testing
 - **Testcontainers** - Containerized testing environments.
 - **JUnit 5** – Unit testing framework.
 - **Mockito** - Mocking frameworks for unit tests.
 
-### 🛠️Build & Dependency Management
+## 🛠️Build & Dependency Management
 - **Maven** – Dependency management and build tool.
 
-### 🐳Containerization
+## 🐳Containerization
 - **Docker** - Containerization tool.
 - **Docker Compose** — Orchestrates multi-container applications.
 
-### 📜API Documentation
+## 📜API Documentation
 - **Swagger** - API documentation.
 
 ---
 
 # 📍Endpoints
-> **💡 Note**: To test the API endpoints, you can import the provided Postman collection (Spring Book Store API Collection.postman_collection) into your Postman.
-### 🛡️Authentication Сontroller
+> **💡 Note**: To test the API endpoints, you can import the provided [**Postman collection**](Spring Book Store API Collection.postman_collection.json) into your Postman.
+## 🛡️Authentication Сontroller
 | Method | Endpoint          | Description                   | Required Role |
 |--------|-------------------|-------------------------------|---------------|
 | POST   | /auth/registration | Create a new user             | (*No role*)   |
 | POST   | /auth/login        | Authenticate an existing user | (*No role*)   |
 
-### 📚Book Сontroller
+## 📚Book Сontroller
 | Method | Endpoint             | Description                | Required Role   |
 |--------|----------------------|----------------------------|-----------------|
 | GET    | /books                | Get list of all books      | USER           |
@@ -79,7 +79,7 @@ This project was developed as part of a learning module to gain hands-on experie
 | DELETE | /books/{id}           | Delete a book              | ️ ADMIN         |
 
 
-### 🗂️Category Сontroller
+## 🗂️Category Сontroller
 | Method | Endpoint               | Description                | Required Role |
 |--------|------------------------|----------------------------|---------------|
 | GET    | /categories             | Get list of all categories | USER         |
@@ -88,7 +88,7 @@ This project was developed as part of a learning module to gain hands-on experie
 | POST   | /categories             | Create a new category      | ADMIN        |
 
 
-### 📦Order Сontroller
+## 📦Order Сontroller
 | Method | Endpoint                | Description                   | Required Role |
 |--------|-------------------------|-------------------------------|---------------|
 | GET    | /orders                  | Get user's orders             | USER         |
@@ -97,7 +97,7 @@ This project was developed as part of a learning module to gain hands-on experie
 | POST   | /orders                  | Create a new order            | USER         |
 | PATCH  | /orders/{orderId}        | Change order status           | ADMIN        |
 
-### 🛒Shopping Cart Сontroller
+## 🛒Shopping Cart Сontroller
 | Method | Endpoint                   | Description                | Required Role |
 |--------|----------------------------|----------------------------|---------------|
 | GET    | /cart                       | Get items in the cart      | USER         |
@@ -189,5 +189,5 @@ mvn spring-boot:run
 ---
 
 ## 🌍Accessing the Application
-- The application will be available at: 
-- Swagger UI will be accessible at: http://localhost:8080/swagger-ui/index.html#/
+- **Swagger UI** is accessible at: `http://localhost:<YOUR_LOCAL_PORT>/swagger-ui/index.html#/`.
+Here, you can explore all the available API endpoints and test them using a user-friendly interface.

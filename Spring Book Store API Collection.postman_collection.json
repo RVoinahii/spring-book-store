@@ -1,0 +1,769 @@
+{
+	"info": {
+		"_postman_id": "0286ea65-ec19-431b-ae1a-a8a8f6d93d32",
+		"name": "Spring Book Store API Collection",
+		"description": "This Postman collection contains all the necessary requests to interact with the Spring Book Store API. It includes endpoints for both shoppers(`USER`) and managers(`ADMIN`). You can use it to register users, browse books, manage shopping carts, place orders, and test the administrative functions for managing books, categories and orders.\n\nFeel free to import and test the API with this collection, and refer to the API documentation for detailed information on each endpoint.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41363994"
+	},
+	"item": [
+		{
+			"name": "Authentication Controller",
+			"item": [
+				{
+					"name": "Authenticate existing user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"bob.doe@example.com\",\r\n  \"password\": \"securePassword123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a new user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"bob.doe@example.com\",\r\n  \"password\": \"securePassword123\",\r\n  \"repeatPassword\": \"securePassword123\",\r\n  \"firstName\": \"Bob\",\r\n  \"lastName\": \"Doe\",\r\n  \"shippingAddress\": \"123 Main St, City, Country\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/registration",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"registration"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "**Endpoints for managing user authentication and registration.**\n\n- **POST** **/auth/registration**  \n    _Create a new user_\n    \n    - **Description**: Registers a new user with the provided details.\n        \n    - **Request**: `UserRegistrationRequestDto` (username, password, etc.)\n        \n    - **Response**: `UserResponseDto` (User information after successful registration)\n        \n- **POST** **/auth/login**  \n    _Authenticate an existing user_\n    \n    - **Description**: Authenticates an existing user with username and password.\n        \n    - **Request**: `UserLoginRequestDto` (username, password)\n        \n    - **Response**: `UserLoginResponseDto` (Authentication token, such as JWT)"
+		},
+		{
+			"name": "Category Controller",
+			"item": [
+				{
+					"name": "Get a category by ID",
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/categories/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"categories",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all categories",
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/categories",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all books by category ID",
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/categories/1/books",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"categories",
+								"1",
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(ADMIN) Create a new category",
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Fiction\",\r\n  \"description\": \"Fiction books\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/categories",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(ADMIN) Update category by ID",
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Fantasy\",\r\n  \"description\": \"Fantasy books\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/categories/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"categories",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(ADMIN) Delete a category by ID",
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/categories/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"categories",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "**Endpoints for managing categories in the library.**\n\n- **GET /categories**  \n    _Get all categories_\n    \n    - **Description**: Retrieves a paginated list of all available categories in the library.\n        \n    - **Request**: `Pageable` (Pagination and sorting parameters)\n        \n    - **Response**: `Page` (Paginated list of categories)\n        \n- **GET /categories/{categoryId}**  \n    _Get a category by ID_\n    \n    - **Description**: Retrieves a category by its unique ID.\n        \n    - **Request**: `categoryId`\n        \n    - **Response**: `CategoryDto` (Details of the requested category)\n        \n- **GET /categories/{categoryId}/books**  \n    _Get all books by category ID_\n    \n    - **Description**: Retrieves a paginated list of books within the specified category.\n        \n    - **Request**: `categoryId`, `Pageable` (Pagination and sorting parameters)\n        \n    - **Response**: `Page` (Paginated list of books)\n        \n- **POST /categories**  \n    _Create a new category_\n    \n    - **Description**: Adds a new category with the provided details.\n        \n    - **Request**: `CreateCategoryRequestDto` (Category details)\n        \n    - **Response**: `CategoryDto` (Details of the newly created category)\n        \n- **PUT /categories/{categoryId}**  \n    _Update a category by ID_\n    \n    - **Description**: Updates an existing category with the provided details.\n        \n    - **Request**: `categoryId`, `CreateCategoryRequestDto` (Updated category details)\n        \n    - **Response**: `CategoryDto` (Updated category details)\n        \n- **DELETE /categories/{categoryId}**  \n    _Delete a category by ID_\n    \n    - **Description**: Marks a category as deleted by its unique ID.\n        \n    - **Request**: `categoryId`\n        \n    - **Response**: `No Content` (No content returned)\n        \n\n---\n\n### **Roles**:\n\n- **USER, ADMIN**: Can view and search categories and books by category.\n    \n- **ADMIN**: Can create, update, and delete categories."
+		},
+		{
+			"name": "Book Controller",
+			"item": [
+				{
+					"name": "Get a book by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/books/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"books",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all books",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/books",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"books"
+							],
+							"query": [
+								{
+									"key": "size",
+									"value": "10",
+									"description": "The size of the page to be returned",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Zero-based page index (0..N)",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "title,ASC",
+									"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all books by parameters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/books/search",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"books",
+								"search"
+							],
+							"query": [
+								{
+									"key": "size",
+									"value": "10",
+									"description": "The size of the page to be returned",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Zero-based page index (0..N)",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "title,ASC",
+									"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+									"disabled": true
+								},
+								{
+									"key": "title",
+									"value": "someTitle",
+									"description": "The title parameter searches for items with a similar title.",
+									"disabled": true
+								},
+								{
+									"key": "author",
+									"value": "someAuthor",
+									"description": "The author parameter searches for items with a similar author.",
+									"disabled": true
+								},
+								{
+									"key": "isbn",
+									"value": "someISBN",
+									"description": "The isbn parameter searches for items with same isbn.",
+									"disabled": true
+								},
+								{
+									"key": "bottomPrice",
+									"value": "0.00",
+									"description": "The bottom price parameter searches for items with a price greater than or equal to the specified value",
+									"disabled": true
+								},
+								{
+									"key": "upperPrice",
+									"value": "99.99",
+									"description": "upper price: The upper price parameter searches for items with a price less than or equal to the specified value",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(ADMIN) Create a new book",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Sample Book\",\r\n  \"author\": \"Author A\",\r\n  \"isbn\": \"978-3-16-148410-0\",\r\n  \"price\": 29.99,\r\n  \"description\": \"Yet another sample book description.\",\r\n  \"categories\": [1],\r\n  \"coverImage\": \"http://example.com/cover.jpg\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/books",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(ADMIN) Update book by ID",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"New title\",\r\n  \"author\": \"New author\",\r\n  \"isbn\": \"978-1-56619-909-4\",\r\n  \"price\": 39.99,\r\n  \"description\": \"New description.\",\r\n  \"categories\": [1, 2],\r\n  \"coverImage\": \"http://example.com/new_cover.jpg\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/books/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"books",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(ADMIN) Delete a book by ID",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/books/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"books",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "**Endpoints for managing books in the library.**\n\n- **GET /books**  \n    _Get all books_\n    \n    - **Description**: Retrieves a paginated list of all available books in the library.\n        \n    - **Request**: `Pageable` (Pagination and sorting parameters)\n        \n    - **Response**: `Page` (Paginated list of books)\n        \n- **GET /books/{bookId}**  \n    _Get a book by ID_\n    \n    - **Description**: Retrieves a book by its unique ID.\n        \n    - **Request**: `bookId`\n        \n    - **Response**: `BookDto` (Details of the requested book)\n        \n- **GET /books/search**  \n    _Search for books by parameters_\n    \n    - **Description**: Search for books based on parameters such as title, author, etc.\n        \n    - **Request**: `BookSearchParameters` (Search criteria)\n        \n    - **Response**: `Page` (Paginated list of matching books)\n        \n- **POST /books**  \n    _Create a new book_\n    \n    - **Description**: Adds a new book to the library with the provided details.\n        \n    - **Request**: `CreateBookRequestDto` (Book details)\n        \n    - **Response**: `BookDto` (Details of the newly created book)\n        \n- **PUT /books/{bookId}**  \n    _Update a book by ID_\n    \n    - **Description**: Updates an existing book with the provided details.\n        \n    - **Request**: `bookId`, `CreateBookRequestDto` (Updated book details)\n        \n    - **Response**: `BookDto` (Updated book details)\n        \n- **DELETE /books/{bookId}**  \n    _Delete a book by ID_\n    \n    - **Description**: Marks a book as deleted by its unique ID.\n        \n    - **Request**: `bookId`\n        \n    - **Response**: `No Content` (No content returned)\n        \n\n---\n\n### **Roles**:\n\n- **USER, ADMIN**: Can view and search books.\n    \n- **ADMIN**: Can create, update, and delete books."
+		},
+		{
+			"name": "Shopping Cart Controller",
+			"item": [
+				{
+					"name": "Get shopping cart info",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/cart",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add new item in shopping cart",
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"bookId\": 1,\r\n  \"quantity\": 5\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/cart",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update cart item quantity by ID",
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"quantity\": 10\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/cart/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"cart",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete cart item by ID",
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/cart/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"cart",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "**Endpoints for managing the shopping cart of the authenticated user.**\n\n- **GET /cart**  \n    _Get shopping cart info_\n    \n    - **Description**: Retrieves all items in the shopping cart of the authenticated user.\n        \n    - **Request**: `Authentication` (Authenticated user)\n        \n    - **Response**: `ShoppingCartDto` (Details of the shopping cart)\n        \n- **POST /cart**  \n    _Add new item in shopping cart_\n    \n    - **Description**: Adds a new item to the authenticated user's shopping cart with the provided details.\n        \n    - **Request**: `AddItemToCartRequestDto` (Item details), `Authentication` (Authenticated user)\n        \n    - **Response**: `ShoppingCartDto` (Updated shopping cart after adding the item)\n        \n- **PUT /cart/item/{itemId}**  \n    _Update shopping cart item by ID_\n    \n    - **Description**: Updates the details of a specific item in the authenticated user's shopping cart.\n        \n    - **Request**: `itemId`, `UpdateItemInCartRequestDto` (Updated item details), `Authentication` (Authenticated user)\n        \n    - **Response**: `ShoppingCartDto` (Updated shopping cart after item update)\n        \n- **DELETE /cart/item/{itemId}**  \n    _Delete an item by ID_\n    \n    - **Description**: Deletes an item from the authenticated user's shopping cart by the given ID.\n        \n    - **Request**: `itemId`\n        \n    - **Response**: `No Content` (Item removed)\n        \n\n---\n\n### **Roles**:\n\n- **USER, ADMIN**: Can view, add, update, and delete items in the shopping cart."
+		},
+		{
+			"name": "Order Controller",
+			"item": [
+				{
+					"name": "Get full order list",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/orders",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"orders"
+							],
+							"query": [
+								{
+									"key": "size",
+									"value": "10",
+									"description": "Zero-based page index (0..N)",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "0",
+									"description": "The size of the page to be returned",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "orderDate,DESC",
+									"description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all items in order ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/orders/1/items",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"orders",
+								"1",
+								"items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get info about item in order by item ID and order ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/orders/1/items/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"orders",
+								"1",
+								"items",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Place new order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"shippingAddress\": \"123 Main St, City, Country\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/orders",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(ADMIN) Update order status by order ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"status\": \"DELIVERED\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/orders/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"orders",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "**Endpoints for managing orders placed by users.**\n\n- **GET /orders**  \n    _Get full order list_\n    \n    - **Description**: Retrieves a paginated list of all orders placed by the authenticated user.\n        \n    - **Request**: `Pageable` (Pagination and sorting parameters), `Authentication` (Authenticated user)\n        \n    - **Response**: `Page` (Paginated list of orders)\n        \n- **GET /orders/{orderId}/items**  \n    _Get all items in order by ID_\n    \n    - **Description**: Retrieves a list of all items in the specified order.\n        \n    - **Request**: `orderId`\n        \n    - **Response**: `List` (List of items in the order)\n        \n- **GET /orders/{orderId}/items/{itemId}**  \n    _Get info about item in order by item ID and order ID_\n    \n    - **Description**: Retrieves details of a specific item in the specified order.\n        \n    - **Request**: `orderId`, `itemId`\n        \n    - **Response**: `OrderItemDto` (Details of the item in the order)\n        \n- **POST /orders**  \n    _Place a new order_\n    \n    - **Description**: Places a new order for the authenticated user with the provided details.\n        \n    - **Request**: `CreateOrderRequestDto` (Order details), `Authentication` (Authenticated user)\n        \n    - **Response**: `OrderDto` (Details of the newly placed order)\n        \n- **PATCH /orders/{orderId}**  \n    _Update order status by order ID_\n    \n    - **Description**: Changes the status of an existing order by its ID.\n        \n    - **Request**: `orderId`, `UpdateOrderStatusRequestDto` (New status details)\n        \n    - **Response**: `OrderDto` (Updated order details)\n        \n\n---\n\n### **Roles**:\n\n- **USER, ADMIN**: Can view their orders, order items, and place new orders.\n    \n- **ADMIN**: Can update the status of any order."
+		}
+	]
+}
