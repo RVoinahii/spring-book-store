@@ -15,9 +15,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         info = @Info(
                 title = "Spring Book Store",
                 version = "1.0.0",
-                description = "A modern, feature-rich online bookstore built with Spring Boot. "
-                        + "This project showcases the power of RESTful APIs, authentication, and CRUD operations."
-                        + " Perfect for learning about web development and microservices architecture.",
+                description = "A modern, feature-rich online bookstore built with Spring Boot."
+                        + " This project showcases the power of RESTful APIs,"
+                        + " authentication, and CRUD operations. Perfect for learning about web"
+                        + " development and microservices architecture.",
                 contact = @Contact(
                         name = "Roman Voynahiy"
                 )
