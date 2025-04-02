@@ -189,8 +189,8 @@ mvn spring-boot:run
 ---
 
 ## 🌍Accessing the Application
-- **Aplication Demo** is available [HERE](http://ec2-13-60-94-14.eu-north-1.compute.amazonaws.com/swagger-ui/index.html#/).  
+- **Application Demo** is available [HERE](http://ec2-13-60-94-14.eu-north-1.compute.amazonaws.com/swagger-ui/index.html#/).  
 This demo version allows anyone to explore how the application works.
 > **💡 Note**: **Demo** only supports functionalities available for the `USER` role. Additionally, **15 books** and **3 categories** are preloaded in the demo for you to explore.
-- **Swagger UI** for local usage is accessible at: `http://localhost:<YOUR_LOCAL_PORT>/swagger-ui/index.html#/`.  
+- **Swagger UI** for **local** usage is accessible at: `http://localhost:<YOUR_LOCAL_PORT>/swagger-ui/index.html#/`.  
 Here, you can explore all the available API endpoints and test them using a user-friendly interface.
